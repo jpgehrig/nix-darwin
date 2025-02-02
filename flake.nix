@@ -32,9 +32,9 @@
         ];
         casks = [
           "notion"
+          "1password"
         ];
         masApps = {
-          "1Password" = 1511601750;
         };
         onActivation.cleanup = "zap";
       };
