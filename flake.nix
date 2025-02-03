@@ -34,6 +34,7 @@
           "1password"
           "docker"
           "notion"
+          "ticktick"
         ];
         masApps = {
         };
