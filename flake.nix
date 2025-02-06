@@ -18,10 +18,7 @@
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
       environment.systemPackages = [
-        pkgs.arc-browser
         pkgs.neovim
-        pkgs.vscode
-        pkgs.warp-terminal
       ];
 
       # Homebrew packages
@@ -31,10 +28,13 @@
           "mas"
         ];
         casks = [
+          "arc"
           "1password"
           "docker"
           "notion"
           "ticktick"
+          "visual-studio-code"
+          "warp"
         ];
         masApps = {
         };
