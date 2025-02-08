@@ -31,12 +31,20 @@
           "arc"
           "1password"
           "docker"
+          "figma"
+          "fujitsu-scansnap-home"
+          "microsoft-office"
+          "microsoft-teams"
           "notion"
+          "raycast"
+          "sketchup"
+          "slack"
           "ticktick"
           "visual-studio-code"
           "warp"
         ];
         masApps = {
+          "postico" = 1031280567;
         };
         onActivation.cleanup = "zap";
       };
