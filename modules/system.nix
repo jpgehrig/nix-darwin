@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, username, ... }:
 
   ###################################################################################
   #
@@ -11,6 +11,23 @@
   #
   ###################################################################################
 {
+  imports = [
+   ./dock
+  ];
+
+  local = {
+    dock.enable = true;
+    dock.entries = [
+              { path = "/Applications/Slack.app/"; }
+              { path = "/System/Applications/Messages.app/"; }
+              {
+                path = "/Users/${username}/Downloads";
+                section = "others";
+                options = "--sort name --view grid --display stack";
+              }
+            ];
+  };
+
   system = {
     stateVersion = 5;
     # activationScripts are executed every time you boot the system or run `nixos-rebuild` / `darwin-rebuild`.
