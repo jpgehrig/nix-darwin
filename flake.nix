@@ -32,6 +32,7 @@
           "1password"
           "docker"
           "figma"
+          "github"
           "fujitsu-scansnap-home"
           "microsoft-office"
           "microsoft-teams"
