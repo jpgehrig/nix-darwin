@@ -10,24 +10,8 @@
   #    https://github.com/yannbertrand/macos-defaults
   #
   ###################################################################################
+
 {
-  imports = [
-   ./dock
-  ];
-
-  local = {
-    dock.enable = true;
-    dock.entries = [
-              { path = "/Applications/Slack.app/"; }
-              { path = "/System/Applications/Messages.app/"; }
-              {
-                path = "/Users/${username}/Downloads";
-                section = "others";
-                options = "--sort name --view grid --display stack";
-              }
-            ];
-  };
-
   system = {
     stateVersion = 5;
     # activationScripts are executed every time you boot the system or run `nixos-rebuild` / `darwin-rebuild`.
@@ -46,11 +30,19 @@
         autohide = true;
         show-recents = false;  # disable recent apps
 
-        # customize Hot Corners(触发角, 鼠标移动到屏幕角落时触发的动作)
+        # customize Hot Corners
         #wvous-tl-corner = 2;  # top-left - Mission Control
         #wvous-tr-corner = 13;  # top-right - Lock Screen
         #wvous-bl-corner = 3;  # bottom-left - Application Windows
         wvous-br-corner = 4;  # bottom-right - Desktop
+
+        persistent-apps = [
+          "Applications/Slack.app/"
+          "/System/Applications/System Settings.app"
+        ];
+        persistent-others = [ 
+          "/Users/${username}/Downloads/" 
+        ];
       };
 
       # customize finder
