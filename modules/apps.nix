@@ -58,7 +58,6 @@
       "raycast"
       "sketchup"
       "slack"
-      "ticktick"
       "visual-studio-code"
       "warp"
     ];
@@ -66,6 +65,7 @@
     # Apps from AppStore
     masApps = {
       "postico" = 1031280567;
+      "ticktick" = 966085870;
     };
   };
 }
