@@ -43,6 +43,7 @@
           "Applications/Slack.app/"
           "/Applications/Microsoft\ Teams.app"
           "/Applications/Notion.app"
+          "/Applications/TickTick.app"
           "/Applications/Visual Studio Code.app"
           "/Applications/Warp.app"
           "/System/Applications/System Settings.app"
