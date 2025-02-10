@@ -64,6 +64,7 @@
 
     # Apps from AppStore
     masApps = {
+      "nordvpn" = 905953485;
       "postico" = 1031280567;
       "ticktick" = 966085870;
     };
