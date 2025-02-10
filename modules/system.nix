@@ -37,7 +37,14 @@
         wvous-br-corner = 4;  # bottom-right - Desktop
 
         persistent-apps = [
+          "/Applications/Arc.app"
+          "/System/Applications/Mail.app"
+          "/Applications/Microsoft Outlook.app"
           "Applications/Slack.app/"
+          "/Applications/Microsoft\ Teams.app"
+          "/Applications/Notion.app"
+          "/Applications/Visual Studio Code.app"
+          "/Applications/Warp.app"
           "/System/Applications/System Settings.app"
         ];
         persistent-others = [ 
