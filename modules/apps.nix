@@ -64,7 +64,10 @@
 
     # Apps from AppStore
     masApps = {
+      "dropover" = 1355679052;
+      "hidden bar" = 1452453066;
       "nordvpn" = 905953485;
+      "poolsuite fm" = 1514817810;
       "postico" = 1031280567;
       "ticktick" = 966085870;
     };
