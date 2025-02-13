@@ -42,6 +42,7 @@
     # `brew install`
     brews = [
       "mas"
+      "tfenv"
     ];
 
     # `brew install --cask`
@@ -49,6 +50,7 @@
       "arc"
       "1password"
       "docker"
+      "drawio"
       "figma"
       "github"
       "fujitsu-scansnap-home"
@@ -70,6 +72,8 @@
       "poolsuite fm" = 1514817810;
       "postico" = 1031280567;
       "ticktick" = 966085870;
+      "whatsapp" = 310633997;
+      "windows app" = 1295203466;
     };
   };
 }
