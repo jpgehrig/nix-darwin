@@ -40,7 +40,7 @@
           "/Applications/Arc.app"
           "/Applications/Spark Desktop.app"
           "/Applications/Microsoft Outlook.app"
-          "Applications/Slack.app/"
+          "/Applications/Slack.app"
           "/Applications/Microsoft\ Teams.app"
           "/Applications/Notion.app"
           "/Applications/TickTick.app"
@@ -58,6 +58,8 @@
         _FXShowPosixPathInTitle = true;  # show full path in finder title
         AppleShowAllExtensions = true;  # show all file extensions
         FXEnableExtensionChangeWarning = false;  # disable warning when changing file extension
+        FXPreferredViewStyle = "Nlsv";  # set default view style to list view
+        NewWindowTarget = "Home";  # set default folder to home
         QuitMenuItem = true;  # enable quit menu item
         ShowPathbar = true;  # show path bar
         ShowStatusBar = true;  # show status bar
