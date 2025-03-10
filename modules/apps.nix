@@ -44,6 +44,7 @@
     brews = [
       "mas"
       "tfenv"
+      "tf-summarize"
       "gh"
     ];
 
@@ -55,6 +56,7 @@
       "drawio"
       "figma"
       "github"
+      "google-drive"
       "fujitsu-scansnap-home"
       "microsoft-office"
       "microsoft-teams"
@@ -63,7 +65,9 @@
       "sketchup"
       "slack"
       "visual-studio-code"
+      "vlc"
       "warp"
+      "xmind"
     ];
 
     # Apps from AppStore
