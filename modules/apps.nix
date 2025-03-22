@@ -17,9 +17,10 @@
   #
   # Related Discussion: https://discourse.nixos.org/t/darwin-again/29331
   environment.systemPackages = with pkgs; [
-    git
-    neovim
     awscli2
+    git
+    python39
+    neovim
   ];
 
   environment.variables.EDITOR = "nvim";
