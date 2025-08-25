@@ -20,6 +20,7 @@
     awscli2
     git
     python39
+    python312
     neovim
   ];
 
