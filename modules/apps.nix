@@ -33,8 +33,9 @@
     enable = true;
 
     onActivation = {
-      autoUpdate = false;
+      autoUpdate = true;
       cleanup = "zap";
+      upgrade = true;
     };
 
     taps = [
@@ -43,7 +44,10 @@
 
     # `brew install`
     brews = [
+      "aws-sam-cli"
       "mas"
+      "pdm"
+      "k6"
       "tfenv"
       "tf-summarize"
       "gh"
