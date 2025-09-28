@@ -174,7 +174,7 @@
       # so it matches common keyboard layout: `ctrl | command | alt`
       #
       # disabled, caused only problems!
-      swap§1LeftCommandAndLeftAlt = false;  
+      swapLeftCommandAndLeftAlt = false;  
     };
   };
 
