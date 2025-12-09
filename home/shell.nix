@@ -5,6 +5,9 @@
     enableCompletion = true;
     initExtra = ''
       export PATH="$PATH:$HOME/bin:$HOME/.local/bin:$HOME/go/bin"
+      # Fix Delete key
+      bindkey "^[[3~" delete-char
+      bindkey "\e[3~" delete-char
     '';
   };
 
