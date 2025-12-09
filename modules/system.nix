@@ -38,7 +38,6 @@
 
         persistent-apps = [
           "/Applications/Arc.app"
-          "/Applications/Spark Desktop.app"
           "/Applications/Microsoft Outlook.app"
           "/Applications/Slack.app"
           "/Applications/Microsoft\ Teams.app"

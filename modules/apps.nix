@@ -56,8 +56,9 @@
 
     # `brew install --cask`
     casks = [
-      "arc"
       "1password"
+      "arc"
+      "clockify"
       "docker"
       "drawio"
       "figma"
@@ -83,7 +84,6 @@
       "nordvpn" = 905953485;
       "poolsuite fm" = 1514817810;
       "postico" = 1031280567;
-      "spark mail" = 6445813049;
       "ticktick" = 966085870;
       "whatsapp" = 310633997;
       "windows app" = 1295203466;
