@@ -19,9 +19,8 @@
   environment.systemPackages = with pkgs; [
     awscli2
     git
-    python39
     python312
-    neovim
+    # neovim is managed via home-manager in home/core.nix
   ];
 
   environment.variables.EDITOR = "nvim";
@@ -39,8 +38,8 @@
       upgrade = true;
     };
 
+    # homebrew/services tap is deprecated - services are now built-in
     taps = [
-      "homebrew/services"
     ];
 
     # `brew install`
@@ -59,7 +58,7 @@
       "1password"
       "arc"
       "clockify"
-      "docker"
+      "docker-desktop"
       "drawio"
       "figma"
       "github"
@@ -71,7 +70,6 @@
       "raycast"
       "sketchup"
       "slack"
-      "visual-studio-code"
       "vlc"
       "warp"
       "xmind"
@@ -82,7 +80,6 @@
       "dropover" = 1355679052;
       "hidden bar" = 1452453066;
       "nordvpn" = 905953485;
-      "poolsuite fm" = 1514817810;
       "postico" = 1031280567;
       "ticktick" = 966085870;
       "whatsapp" = 310633997;

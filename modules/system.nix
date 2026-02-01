@@ -1,4 +1,4 @@
-{ pkgs, username, ... }:
+{ pkgs, username, lib, ... }:
 
   ###################################################################################
   #
@@ -12,14 +12,13 @@
   ###################################################################################
 
 {
+  # Required for user-specific settings (dock, finder, homebrew, etc.) in nix-darwin 25.05+
+  system.primaryUser = username;
+
   system = {
     stateVersion = 5;
-    # activationScripts are executed every time you boot the system or run `nixos-rebuild` / `darwin-rebuild`.
-    activationScripts.postUserActivation.text = ''
-      # activateSettings -u will reload the settings from the database and apply them to the current session,
-      # so we do not need to logout and login again to make the changes take effect.
-      /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
-    '';
+    # activationScripts.postUserActivation was removed in 25.05 (activation now runs as root)
+    # The settings reload now happens automatically
 
     defaults = {
       # show 24 hour clock
@@ -177,8 +176,8 @@
     };
   };
 
-  # Add ability to used TouchID for sudo authentication
-  security.pam.enableSudoTouchIdAuth = true;
+  # Add ability to used TouchID for sudo authentication (renamed in 25.05)
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   # Create /etc/zshrc that loads the nix-darwin environment.
   # this is required if you want to use darwin's default shell - zsh
@@ -197,10 +196,9 @@
       material-design-icons
       font-awesome
 
-      # nerdfonts
-      # https://github.com/NixOS/nixpkgs/blob/nixos-24.05/pkgs/data/fonts/nerdfonts/shas.nix
-      (pkgs.nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
-
+      # nerdfonts (new syntax as of nixpkgs 24.05+)
+      nerd-fonts.fira-code
+      nerd-fonts.jetbrains-mono
     ];
   };
 }
