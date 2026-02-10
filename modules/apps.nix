@@ -44,9 +44,12 @@
 
     # `brew install`
     brews = [
+      "arduino-cli"
       "aws-sam-cli"
       "mas"
       "pdm"
+      "pnpm"
+      "node"
       "k6"
       "tfenv"
       "tf-summarize"
@@ -57,6 +60,7 @@
     casks = [
       "1password"
       "arc"
+      "balenaetcher"
       "clockify"
       "docker-desktop"
       "drawio"
@@ -64,7 +68,6 @@
       "github"
       "google-drive"
       "fujitsu-scansnap-home"
-      "microsoft-office"
       "microsoft-teams"
       "notion"
       "raycast"
