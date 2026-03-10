@@ -20,7 +20,6 @@
     awscli2
     git
     python312
-    # neovim is managed via home-manager in home/core.nix
   ];
 
   environment.variables.EDITOR = "nvim";
@@ -38,14 +37,10 @@
       upgrade = true;
     };
 
-    # homebrew/services tap is deprecated - services are now built-in
-    taps = [
-    ];
-
     # `brew install`
     brews = [
       "arduino-cli"
-      "aws-sam-cli"
+      "aws-vault"
       "mas"
       "pdm"
       "pnpm"
@@ -70,10 +65,11 @@
       "fujitsu-scansnap-home"
       "microsoft-teams"
       "notion"
+      "prosys-opc-ua-browser"
       "raycast"
-      "sketchup"
       "slack"
       "vlc"
+      "vscodium"
       "warp"
       "xmind"
     ];
@@ -83,8 +79,6 @@
       "dropover" = 1355679052;
       "hidden bar" = 1452453066;
       "nordvpn" = 905953485;
-      "postico" = 1031280567;
-      "ticktick" = 966085870;
       "whatsapp" = 310633997;
       "windows app" = 1295203466;
     };

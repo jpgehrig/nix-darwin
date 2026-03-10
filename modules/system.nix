@@ -37,13 +37,9 @@
 
         persistent-apps = [
           "/Applications/Arc.app"
-          "/Applications/Microsoft Outlook.app"
           "/Applications/Slack.app"
-          "/Applications/Microsoft\ Teams.app"
           "/Applications/Notion.app"
-          "/Applications/TickTick.app"
-          "/Applications/Visual Studio Code.app"
-          "/Applications/Warp.app"
+          "/Applications/VSCodium.app"
           "/System/Applications/System Settings.app"
         ];
         persistent-others = [ 
