@@ -48,6 +48,7 @@
       "k6"
       "tfenv"
       "tf-summarize"
+      "typst"
       "gh"
     ];
 
