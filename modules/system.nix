@@ -30,6 +30,7 @@
         wvous-br-corner = 4;  # bottom-right - Desktop
 
         persistent-apps = [
+          "/Applications/Zen.app"
           "/Applications/Slack.app"
           "/Applications/Notion.app"
           "/Applications/VSCodium.app"
