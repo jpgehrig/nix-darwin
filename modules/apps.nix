@@ -1,21 +1,6 @@
-{ pkgs, ...}: {
-
-  ##########################################################################
-  #
-  #  Install all apps and packages here.
-  #
-  #  NOTE: Your can find all available options in:
-  #    https://daiderd.com/nix-darwin/manual/index.html
-  #
-  #
-  ##########################################################################
-
-  # Install packages from nix's official package repository.
-  #
-  # The packages installed here are available to all users, and are reproducible across machines, and are rollbackable.
-  # But on macOS, it's less stable than homebrew.
-  #
-  # Related Discussion: https://discourse.nixos.org/t/darwin-again/29331
+{pkgs, ...}: {
+  # System-wide packages (reproducible, rollback-able).
+  # Prefer Home Manager for user packages; keep this list minimal.
   environment.systemPackages = with pkgs; [
     awscli2
     git
@@ -24,35 +9,33 @@
 
   environment.variables.EDITOR = "nvim";
 
-  # To make this work, homebrew need to be installed manually, see https://brew.sh
-  #
-  # The apps installed by homebrew are not managed by nix, and not reproducible!
-  # But on macOS, homebrew has a much larger selection of apps than nixpkgs, especially for GUI apps!
+  # Homebrew must be installed manually first: https://brew.sh
+  # GUI apps, App Store apps, and a few CLI tools not in nixpkgs.
   homebrew = {
     enable = true;
 
     onActivation = {
       autoUpdate = true;
-      cleanup = "zap";
       upgrade = true;
+      cleanup = "zap";
     };
 
-    # `brew install`
+    taps = [];
+
     brews = [
       "arduino-cli"
       "aws-vault"
+      "gh"
+      "k6"
       "mas"
+      "node"
       "pdm"
       "pnpm"
-      "node"
-      "k6"
-      "tfenv"
       "tf-summarize"
+      "tfenv"
       "typst"
-      "gh"
     ];
 
-    # `brew install --cask`
     casks = [
       "1password"
       "arc"
@@ -61,9 +44,9 @@
       "docker-desktop"
       "drawio"
       "figma"
+      "fujitsu-scansnap-home"
       "github"
       "google-drive"
-      "fujitsu-scansnap-home"
       "microsoft-teams"
       "notion"
       "prosys-opc-ua-browser"
@@ -75,7 +58,6 @@
       "xmind"
     ];
 
-    # Apps from AppStore
     masApps = {
       "dropover" = 1355679052;
       "hidden bar" = 1452453066;

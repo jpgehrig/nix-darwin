@@ -1,24 +1,18 @@
-{ pkgs, username, lib, ... }:
-
-  ###################################################################################
-  #
-  #  macOS's System configuration
-  #
-  #  All the configuration options are documented here:
-  #    https://daiderd.com/nix-darwin/manual/index.html#sec-options
-  #  Incomplete list of macOS `defaults` commands :
-  #    https://github.com/yannbertrand/macos-defaults
-  #
-  ###################################################################################
-
 {
-  # Required for user-specific settings (dock, finder, homebrew, etc.) in nix-darwin 25.05+
+  pkgs,
+  username,
+  lib,
+  ...
+}:
+# macOS system configuration
+# Options: https://nix-darwin.github.io/nix-darwin/manual/index.html
+# `defaults` reference: https://github.com/yannbertrand/macos-defaults
+{
+  # Required for user-scoped settings (dock, finder, homebrew, ...)
   system.primaryUser = username;
 
   system = {
     stateVersion = 5;
-    # activationScripts.postUserActivation was removed in 25.05 (activation now runs as root)
-    # The settings reload now happens automatically
 
     defaults = {
       # show 24 hour clock
@@ -36,7 +30,6 @@
         wvous-br-corner = 4;  # bottom-right - Desktop
 
         persistent-apps = [
-          "/Applications/Arc.app"
           "/Applications/Slack.app"
           "/Applications/Notion.app"
           "/Applications/VSCodium.app"

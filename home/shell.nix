@@ -5,11 +5,21 @@
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
     historySubstringSearch.enable = true;
-    initContent = ''
-      # Homebrew
-      eval "$(/opt/homebrew/bin/brew shellenv)"
 
-      # Additional paths
+    history = {
+      size = 50000;
+      save = 50000;
+      ignoreDups = true;
+      ignoreSpace = true;
+      share = true;
+    };
+
+    initContent = ''
+      # Homebrew (Apple Silicon path)
+      if [ -x /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      fi
+
       export PATH="$PATH:$HOME/bin:$HOME/.local/bin:$HOME/go/bin"
 
       # Fix Delete key
@@ -26,10 +36,7 @@
 
   home.shellAliases = {
     k = "kubectl";
-
-    # nix-darwin rebuild
-    rebuild = "darwin-rebuild switch --flake ~/.config/nix-darwin";
-
+    rebuild = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin";
     urldecode = "python3 -c 'import sys, urllib.parse as ul; print(ul.unquote_plus(sys.stdin.read()))'";
     urlencode = "python3 -c 'import sys, urllib.parse as ul; print(ul.quote_plus(sys.stdin.read()))'";
   };

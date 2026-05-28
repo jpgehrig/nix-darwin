@@ -53,15 +53,16 @@
     yazi = {
       enable = true;
       enableZshIntegration = true;
-      settings = {
-        manager = {
-          show_hidden = true;
-          sort_dir_first = true;
-        };
+      settings.manager = {
+        show_hidden = true;
+        sort_dir_first = true;
       };
     };
 
-    # fzf is already installed via home.packages, so we don't need skim
-    # (they serve the same purpose - fuzzy finding)
+    bat.enable = true;
+    zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+    };
   };
 }

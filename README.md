@@ -1,59 +1,95 @@
-# Nix Darwin
+# nix-darwin configuration
 
-A basic configuration comprising essential settings for initiating nix-darwin based on [nix-darwin-kickstarter](https://github.com/ryan4yin/nix-darwin-kickstarter/tree/main/minimal)
+Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix-darwin) and [home-manager](https://github.com/nix-community/home-manager), targeting **nixpkgs 25.11** (`aarch64-darwin`). Based on [nix-darwin-kickstarter](https://github.com/ryan4yin/nix-darwin-kickstarter/tree/main/minimal).
 
-## New installation
+## Layout
 
 ```
-cd ~ && mkdir .config && cd .config
-git clone https://github.com/jpgehrig/nix-darwin.git
-nix build .#darwinConfigurations.jps-mbp.system --extra-experimental-features 'nix-command flakes'
-./result/sw/bin/darwin-rebuild: system activation must now be run as root
+.
+├── flake.nix              # Inputs, outputs, host definitions
+├── flake.lock             # Pinned input revisions (generated)
+├── modules/               # System (nix-darwin) modules
+│   ├── nix-core.nix       # Nix daemon: flakes, GC, store optimisation
+│   ├── system.nix         # macOS defaults (dock, finder, trackpad, fonts, TouchID sudo)
+│   ├── apps.nix           # System packages + Homebrew (brews / casks / mas)
+│   └── host-users.nix     # Hostname & user account
+└── home/                  # Home Manager (user-level) modules
+    ├── default.nix
+    ├── core.nix           # CLI tools (ripgrep, fzf, eza, bat, yazi, zoxide, …)
+    ├── shell.nix          # zsh + direnv + aliases
+    ├── git.nix            # git + delta + aliases
+    └── starship.nix       # prompt
 ```
 
+## Setting up a new Mac
 
-## How to Use
-
-1. Install Nix package manager via [Nix Official](https://nixos.org/download.html#nix-install-macos) or [DeterminateSystems/nix-installer](https://github.com/DeterminateSystems/nix-installer).
-2. Read all the files in this `minimal` folder, and understand what they do.
-   1. If you have trouble understanding, [ryan4yin/nixos-and-flakes-book](https://github.com/ryan4yin/nixos-and-flakes-book) is a good resource to learn nix and flakes.
-3. Install Homebrew, see <https://brew.sh/>
-   1. Homebrew is required to install most of the GUI apps, App Store's apps, and some CLI apps that are not available in nix's package repository `nixpkgs`.
-4. Search `TODO` in this `minimal` folder, and complete all the TODOs.
-5. Run the following command in the root of your nix configuration to start your nix-darwin journey(please change `hostname` to your hostname):
-   ```bash
-	nix build .#darwinConfigurations.hostname.system \
-		--extra-experimental-features 'nix-command flakes'
-
-	./result/sw/bin/darwin-rebuild switch --flake .#hostname
+1. **Install Xcode Command Line Tools** (needed for git, compilers):
+   ```sh
+   xcode-select --install
    ```
 
-To simplify the command, adding the following content by create a `Makefile` in the root of your nix configuration:
+2. **Install Nix** — upstream Nix via the Determinate Systems installer (flakes enabled, clean uninstall):
+   ```sh
+   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
+     | sh -s -- install --determinate=false
+   ```
+   Open a new shell so `nix` is on `PATH`.
 
-```makefile
-# please change 'hostname' to your hostname
-deploy:
-	nix build .#darwinConfigurations.hostname.system \
-	   --extra-experimental-features 'nix-command flakes'
+3. **Install Homebrew** (required for casks / mas / a handful of CLI tools):
+   ```sh
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
 
-	./result/sw/bin/darwin-rebuild switch --flake .#hostname
+4. **Clone this repo**:
+   ```sh
+   mkdir -p ~/.config && cd ~/.config
+   git clone https://github.com/jpgehrig/nix-darwin.git
+   cd nix-darwin
+   ```
+
+5. **Adjust identity** in `flake.nix` (`username`, `useremail`, `hostname`) if you're not me.
+
+6. **Bootstrap nix-darwin** — activation must run as root since 25.05. On the very first run, flakes aren't enabled in root's nix config yet, so pass them inline:
+   ```sh
+   sudo -H nix --extra-experimental-features 'nix-command flakes' \
+     run nix-darwin/nix-darwin-25.11#darwin-rebuild -- switch --flake .#jps-mbp
+   ```
+
+   After the first activation, `modules/nix-core.nix` enables `nix-command` and `flakes` daemon-wide, so subsequent rebuilds simplify to:
+   ```sh
+   sudo darwin-rebuild switch --flake ~/.config/nix-darwin
+   ```
+   (or just `rebuild` — aliased in `home/shell.nix`).
+
+7. **Sign in to the Mac App Store** before the first rebuild if `masApps` is non-empty (otherwise `mas` install will fail).
+
+## Updating inputs
+
+```sh
+nix flake update                 # bump all inputs
+nix flake update nixpkgs         # bump a single input
+darwin-rebuild switch --flake .  # apply
 ```
 
-Then you can run `make deploy` in the root of your nix configuration to deploy your configuration.
+## Rolling back
 
-## Configuration Structure
-
-Your current nix-darwin configuration's structure should be as follows:
-
-```bash
-› tree
-.
-├── flake.lock  # a lock file generated by nix, you can ignore it for now
-├── flake.nix   # the entry point of your nix configuration, you need to add your hostname here
-├── modules     # a folder contains all your nix-darwin configuration files
-│   ├── apps.nix        # contains all your homebrew & nix apps(both GUI & CLI)
-│   ├── host-users.nix  # defines your hostname & all your system users
-│   ├── nix-core.nix    # nix's core configuration, you can ignore it for now
-│   └── system.nix      # defines your macOS's system configuration(like dock, trackpad, keyboard, finder, loginwindow, etc.)
-└── README.md
+```sh
+darwin-rebuild --list-generations
+darwin-rebuild switch --rollback
 ```
+
+## Useful commands
+
+| Command | What it does |
+|---|---|
+| `rebuild` | `darwin-rebuild switch --flake ~/.config/nix-darwin` |
+| `nix flake check` | Evaluate the flake without building |
+| `nix fmt` | Format `.nix` files with alejandra |
+| `nix-collect-garbage -d` | Delete old generations now (weekly GC also runs automatically) |
+
+## Notes
+
+- Targets `aarch64-darwin` (Apple Silicon). Change `system` in `flake.nix` for Intel Macs.
+- Home Manager is wired in as a `darwin` module (`useGlobalPkgs = true`), so packages share the system `nixpkgs` and config.
+- Conflicting files written by Home Manager are backed up with the `.hm-backup` suffix.
+- TouchID for `sudo` is enabled via `security.pam.services.sudo_local.touchIdAuth`.
