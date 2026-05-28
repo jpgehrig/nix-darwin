@@ -24,7 +24,6 @@
 
     brews = [
       "arduino-cli"
-      "aws-vault"
       "gh"
       "mas"
       "node"
