@@ -40,6 +40,7 @@
       "1password"
       "arc"
       "balenaetcher"
+      "claude"
       "clockify"
       "docker-desktop"
       "drawio"
@@ -56,6 +57,7 @@
       "vscodium"
       "warp"
       "xmind"
+      "zen"
     ];
 
     masApps = {

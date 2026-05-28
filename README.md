@@ -49,7 +49,13 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 
 5. **Adjust identity** in `flake.nix` (`username`, `useremail`, `hostname`) if you're not me.
 
-6. **Bootstrap nix-darwin** — activation must run as root since 25.05. On the very first run, flakes aren't enabled in root's nix config yet, so pass them inline:
+6. **Move aside installer-managed shell files** so nix-darwin can take them over (otherwise activation aborts with "Unexpected files in /etc"):
+   ```sh
+   sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin 2>/dev/null || true
+   sudo mv /etc/zshrc  /etc/zshrc.before-nix-darwin  2>/dev/null || true
+   ```
+
+7. **Bootstrap nix-darwin** — activation must run as root since 25.05. On the very first run, flakes aren't enabled in root's nix config yet, so pass them inline:
    ```sh
    sudo -H nix --extra-experimental-features 'nix-command flakes' \
      run nix-darwin/nix-darwin-25.11#darwin-rebuild -- switch --flake .#jps-mbp
@@ -61,7 +67,7 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    ```
    (or just `rebuild` — aliased in `home/shell.nix`).
 
-7. **Sign in to the Mac App Store** before the first rebuild if `masApps` is non-empty (otherwise `mas` install will fail).
+8. **Sign in to the Mac App Store** before the first rebuild if `masApps` is non-empty (otherwise `mas` install will fail).
 
 ## Updating inputs
 

@@ -35,7 +35,7 @@
   }: let
     username = "jpgehrig";
     useremail = "jp.gehrig@gmail.com";
-    system = "x86_64-darwin";
+    system = "aarch64-darwin";
     hostname = "jps-mbp";
 
     specialArgs = inputs // {inherit username useremail hostname;};

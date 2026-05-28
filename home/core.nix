@@ -30,6 +30,7 @@
 
     # productivity
     glow # markdown previewer in terminal
+    claude-code # Anthropic Claude Code CLI
   ];
 
   programs = {
