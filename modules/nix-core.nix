@@ -1,7 +1,7 @@
 {lib, ...}: {
   nix.settings = {
     experimental-features = ["nix-command" "flakes"];
-    # Drop legacy channels; everything lives in the flake
+    # superseded by nix.optimise.automatic below
     auto-optimise-store = lib.mkDefault false;
   };
 
@@ -18,6 +18,5 @@
     options = lib.mkDefault "--delete-older-than 7d";
   };
 
-  # Periodic store optimisation (replaces nix.settings.auto-optimise-store)
   nix.optimise.automatic = true;
 }

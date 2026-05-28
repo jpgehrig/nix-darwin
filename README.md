@@ -14,7 +14,7 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 │   ├── apps.nix           # System packages + Homebrew (brews / casks / mas)
 │   └── host-users.nix     # Hostname & user account
 └── home/                  # Home Manager (user-level) modules
-    ├── default.nix
+    ├── default.nix        # Entry point, imports the rest
     ├── core.nix           # CLI tools (ripgrep, fzf, eza, bat, yazi, zoxide, …)
     ├── shell.nix          # zsh + direnv + aliases
     ├── git.nix            # git + delta + aliases
@@ -88,7 +88,7 @@ darwin-rebuild switch --rollback
 
 | Command | What it does |
 |---|---|
-| `rebuild` | `darwin-rebuild switch --flake ~/.config/nix-darwin` |
+| `rebuild` | `sudo darwin-rebuild switch --flake ~/.config/nix-darwin` |
 | `nix flake check` | Evaluate the flake without building |
 | `nix fmt` | Format `.nix` files with alejandra |
 | `nix-collect-garbage -d` | Delete old generations now (weekly GC also runs automatically) |
@@ -99,3 +99,6 @@ darwin-rebuild switch --rollback
 - Home Manager is wired in as a `darwin` module (`useGlobalPkgs = true`), so packages share the system `nixpkgs` and config.
 - Conflicting files written by Home Manager are backed up with the `.hm-backup` suffix.
 - TouchID for `sudo` is enabled via `security.pam.services.sudo_local.touchIdAuth`.
+- Homebrew uses `cleanup = "zap"`: any brew / cask / mas app **not** declared in `modules/apps.nix` will be uninstalled on the next `rebuild`. Add it to the lists before installing manually.
+- Git config is managed by Home Manager and written to `~/.config/git/config`. Any pre-existing `~/.gitconfig` is removed on activation (see `home/git.nix`).
+- Anything under `~/work/` automatically picks up `~/work/.gitconfig` via a conditional include — keep work identity / signing keys there.
