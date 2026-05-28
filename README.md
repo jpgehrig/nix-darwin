@@ -2,6 +2,16 @@
 
 A basic configuration comprising essential settings for initiating nix-darwin based on [nix-darwin-kickstarter](https://github.com/ryan4yin/nix-darwin-kickstarter/tree/main/minimal)
 
+## New installation
+
+```
+cd ~ && mkdir .config && cd .config
+git clone https://github.com/jpgehrig/nix-darwin.git
+nix build .#darwinConfigurations.jps-mbp.system --extra-experimental-features 'nix-command flakes'
+./result/sw/bin/darwin-rebuild: system activation must now be run as root
+```
+
+
 ## How to Use
 
 1. Install Nix package manager via [Nix Official](https://nixos.org/download.html#nix-install-macos) or [DeterminateSystems/nix-installer](https://github.com/DeterminateSystems/nix-installer).
