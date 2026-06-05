@@ -6,6 +6,9 @@
       extensions = with pkgs.vscode-extensions; [
         myriad-dreamin.tinymist
       ];
+      userSettings = {
+        "tinymist.serverPath" = "${pkgs.tinymist}/bin/tinymist";
+      };
       keybindings = [
         {
           key = "shift+enter";
