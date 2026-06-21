@@ -25,6 +25,7 @@
     brews = [
       "arduino-cli"
       "gh"
+      "googleworkspace-cli"
       "mas"
       "node"
       "pdm"
@@ -35,8 +36,8 @@
     ];
 
     casks = [
+      "nikitabobko/tap/aerospace"
       "1password"
-      "arc"
       "balenaetcher"
       "claude"
       "docker-desktop"
@@ -44,6 +45,7 @@
       "figma"
       "fujitsu-scansnap-home"
       "github"
+      "gcloud-cli"
       "google-drive"
       "microsoft-teams"
       "notion"
@@ -54,6 +56,7 @@
       "vlc"
       "warp"
       "xmind"
+      "zed"
       "zen"
     ];
 
