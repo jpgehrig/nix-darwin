@@ -47,6 +47,7 @@
       "github"
       "gcloud-cli"
       "google-drive"
+      "libreoffice"
       "microsoft-teams"
       "notion"
       "plaud"
