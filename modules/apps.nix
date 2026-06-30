@@ -36,9 +36,9 @@
     ];
 
     casks = [
-      "1password-cli"
       "nikitabobko/tap/aerospace"
       "1password"
+      "1password-cli"
       "balenaetcher"
       "claude"
       "docker-desktop"
