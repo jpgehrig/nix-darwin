@@ -50,7 +50,11 @@
       "gcloud-cli"
       "google-drive"
       "libreoffice"
-      "microsoft-teams"
+      # greedy: also upgrade this self-updating cask on rebuild (`brew upgrade --greedy`).
+      {
+        name = "microsoft-teams";
+        greedy = true;
+      }
       "notion"
       "plaud"
       "prosys-opc-ua-browser"
