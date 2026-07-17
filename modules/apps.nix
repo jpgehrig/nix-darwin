@@ -26,6 +26,7 @@
       "arduino-cli"
       "gh"
       "googleworkspace-cli"
+      "imagemagick"
       "mas"
       "node"
       "pdm"
