@@ -24,6 +24,7 @@
 
     brews = [
       "arduino-cli"
+      "eza"
       "gh"
       "googleworkspace-cli"
       "imagemagick"
