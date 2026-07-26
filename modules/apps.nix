@@ -43,7 +43,6 @@
       "1password-cli"
       "balenaetcher"
       "claude"
-      "claude-code"
       "docker-desktop"
       "drawio"
       "figma"
