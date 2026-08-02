@@ -50,7 +50,7 @@
       "github"
       "gcloud-cli"
       "google-drive"
-      "libreoffice"
+      "onlyoffice"
       # greedy: also upgrade this self-updating cask on rebuild (`brew upgrade --greedy`).
       {
         name = "microsoft-teams";
