@@ -46,6 +46,7 @@
       "pnpm" # 11 vs nixpkgs 10
       "tf-summarize"
       "typst"
+      "uv" # 0.12 vs nixpkgs 0.9; python packaging / `uv run --script`
     ];
 
     casks = [
