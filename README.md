@@ -6,7 +6,7 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 
 ```
 .
-├── flake.nix              # Inputs, outputs, host definitions
+├── flake.nix              # Inputs + one mkHost entry per machine
 ├── flake.lock             # Pinned input revisions (generated)
 ├── modules/               # System (nix-darwin) modules
 │   ├── nix-core.nix       # nix.enable = false (Determinate) + GC / optimise jobs
@@ -52,21 +52,25 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    > `https://github.com/` → `git@github.com:`, so this same command would
    > require SSH that isn't set up until step 9.
 
-5. **Set the hostname and identity** in `flake.nix` — `username`, `useremail`, `useremailWork`, and `hostname`.
+5. **Add your host** to `darwinConfigurations` in `flake.nix`, and adjust
+   `username` / `useremail` / `useremailWork` if you're not me.
 
-   `hostname` does double duty: it names the flake output you activate in step 7
-   (`.#<hostname>`) *and* becomes the machine's ComputerName / LocalHostName /
-   NetBIOSName via `modules/host-users.nix`. Set it **before** bootstrapping —
-   e.g. `jps-macbook` for a new MacBook:
+   Each host name does double duty: it names the flake output you activate in
+   step 7 (`.#<hostname>`) *and* becomes the machine's ComputerName /
+   LocalHostName / NetBIOSName via `modules/host-users.nix`. A Mac whose name
+   matches no entry fails with
+   `flake output attribute 'darwinConfigurations.<name>' does not exist`.
 
    ```nix
-   hostname = "jps-macbook";
+   darwinConfigurations = {
+     jps-macbook = mkHost "jps-macbook";
+     jps-old-macbook = mkHost "jps-old-macbook";
+   };
    ```
 
-   The config defines a single host, so a fresh Mac whose name doesn't match
-   fails with `flake output attribute 'darwinConfigurations.<name>' does not exist`.
-   Editing this value first avoids activating under the wrong name and having to
-   rename afterwards.
+   Because the output name and the machine name agree, `darwin-rebuild` with no
+   explicit `.#target` resolves to whichever host it runs on — so `rebuild` works
+   unqualified on every machine.
 
    If you're using a different SSH key, also update `sshPublicKey` in `home/git.nix` — commits are signed with it and activation will configure signing regardless of whether the key exists yet. Generate one per machine so a lost Mac can be revoked on its own.
 

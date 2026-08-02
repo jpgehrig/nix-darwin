@@ -38,29 +38,37 @@
     # Used for repos under ~/work/ via a conditional git include.
     useremailWork = "jp.gehrig@56k.cloud";
     system = "aarch64-darwin";
-    hostname = "jps-macbook";
 
-    specialArgs = inputs // {inherit username useremail useremailWork hostname;};
+    # One entry per machine. `hostname` names the flake output *and* sets the
+    # machine's ComputerName / LocalHostName, so `darwin-rebuild` with no
+    # explicit `.#target` resolves to the host it is running on.
+    mkHost = hostname: let
+      specialArgs = inputs // {inherit username useremail useremailWork hostname;};
+    in
+      nix-darwin.lib.darwinSystem {
+        inherit system specialArgs;
+        modules = [
+          ./modules/nix-core.nix
+          ./modules/system.nix
+          ./modules/apps.nix
+          ./modules/host-users.nix
+
+          home-manager.darwinModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "hm-backup";
+              extraSpecialArgs = specialArgs;
+              users.${username} = import ./home;
+            };
+          }
+        ];
+      };
   in {
-    darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
-      inherit system specialArgs;
-      modules = [
-        ./modules/nix-core.nix
-        ./modules/system.nix
-        ./modules/apps.nix
-        ./modules/host-users.nix
-
-        home-manager.darwinModules.home-manager
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            backupFileExtension = "hm-backup";
-            extraSpecialArgs = specialArgs;
-            users.${username} = import ./home;
-          };
-        }
-      ];
+    darwinConfigurations = {
+      jps-macbook = mkHost "jps-macbook";
+      jps-old-macbook = mkHost "jps-old-macbook";
     };
 
     formatter.${system} = nixpkgs.legacyPackages.${system}.alejandra;
