@@ -159,14 +159,43 @@ def merge(session: dict, cfg: dict, cmap: dict[str, int]) -> dict:
     """Apply spaces.json onto a decoded session, returning a new session."""
     out = json.loads(json.dumps(session))  # deep copy
     by_uuid = {s["uuid"]: s for s in out.get("spaces", [])}
+    # uuids are minted per profile, so a fresh Mac's Spaces never carry the
+    # captured ones. Matching on uuid alone left Zen's own default Space
+    # orphaned next to five newly-created ones, with pins bound to Spaces the
+    # sidebar showed under different names. Match by name first and adopt the
+    # existing uuid; fall back to uuid so a rename in spaces.json still lands
+    # on the right Space.
+    by_name = {s.get("name"): s for s in out.get("spaces", []) if s.get("name")}
+    # A Space this run has already claimed cannot be reused by another.
+    claimed: set[int] = set()
+    uuid_remap: dict[str, str] = {}
+
+    # Spaces the profile already has that carry no pinned tabs. A fresh profile
+    # ships exactly one of these ("Space"), and it is neither uuid- nor
+    # name-matchable once spaces.json renames it -- so without this it would be
+    # left orphaned beside the restored Spaces. Only empty Spaces are eligible:
+    # adopting one that holds pins would silently swallow the user's tabs.
+    pinned_spaces = {
+        t.get("zenWorkspace")
+        for t in out.get("tabs", [])
+        if t.get("pinned") or t.get("zenEssential")
+    }
+    spare = [s for s in out.get("spaces", []) if s.get("uuid") not in pinned_spaces]
 
     for want in cfg.get("spaces", []):
-        uuid = want["uuid"]
-        space = by_uuid.get(uuid)
+        space = by_name.get(want["name"]) or by_uuid.get(want["uuid"])
+        if space is not None and id(space) in claimed:
+            space = None
         if space is None:
-            space = {"uuid": uuid}
+            # Adopt an unused Space before minting a new one.
+            space = next((s for s in spare if id(s) not in claimed), None)
+        if space is None:
+            space = {"uuid": want["uuid"]}
             out.setdefault("spaces", []).append(space)
-            by_uuid[uuid] = space
+            by_uuid[want["uuid"]] = space
+        claimed.add(id(space))
+        # Pins reference the *profile's* uuid, not the captured one.
+        uuid_remap[want["uuid"]] = space["uuid"]
         space["name"] = want["name"]
         space["icon"] = want["icon"]
         space["theme"] = want["theme"]
@@ -183,7 +212,7 @@ def merge(session: dict, cfg: dict, cmap: dict[str, int]) -> dict:
             )
 
     # Rebuild pinned/essential tabs from config; keep non-pinned tabs untouched.
-    wanted_uuids = {s["uuid"] for s in cfg.get("spaces", [])}
+    wanted_uuids = set(uuid_remap.values())
     kept = [
         t
         for t in out.get("tabs", [])
@@ -201,7 +230,7 @@ def merge(session: dict, cfg: dict, cmap: dict[str, int]) -> dict:
                     "pinned": True,
                     "hidden": False,
                     "zenEssential": bool(pin.get("essential")),
-                    "zenWorkspace": want["uuid"],
+                    "zenWorkspace": uuid_remap[want["uuid"]],
                     "zenPinnedIcon": pin.get("icon"),
                     "zenHasStaticIcon": pin.get("icon") is not None,
                     "zenStaticLabel": pin.get("label"),
@@ -251,7 +280,9 @@ def managed_view(session: dict, cmap: dict[str, int]) -> dict:
                 "name": s.get("name"),
                 "pins": p,
                 "theme": s.get("theme"),
-                "uuid": s["uuid"],
+                # uuid is deliberately absent: it is minted per profile, so
+                # including it would show every fresh-profile restore as a diff
+                # even when every managed field already matches.
             }
         )
     spaces.sort(key=lambda s: s["name"])
