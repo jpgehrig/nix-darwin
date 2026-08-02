@@ -166,6 +166,79 @@
     };
   };
 
+  # nix-darwin's `dock.persistent-others` only takes paths, and rewrites each
+  # tile with default view options. Patch the Downloads stack afterwards so it
+  # sorts by date added (newest first) and displays as a folder rather than a
+  # stack.
+  #
+  # Three things here are load-bearing; each was a separate failed attempt:
+  #
+  # 1. Activation runs as root, so this hops into ${username}'s GUI session
+  #    with `launchctl asuser ... sudo --user=`, matching how nix-darwin's own
+  #    dock module invokes `defaults`. A bare `sudo -u` runs outside the user's
+  #    Mach bootstrap namespace and reaches a different `cfprefsd` than the
+  #    logged-in session, whose daemon then overwrites the file.
+  #
+  # 2. It reads and writes via `defaults export`/`import` rather than editing
+  #    the plist directly. cfprefsd holds this domain in memory, so a direct
+  #    file edit (e.g. PlistBuddy) gets clobbered when the daemon next flushes.
+  #    Round-tripping the domain also preserves each tile's `book` bookmark
+  #    blob, which the Dock needs to resolve the folder.
+  #
+  # 3. It retries. nix-darwin kills the Dock earlier in activation, and the
+  #    relaunching Dock writes its own in-memory prefs back out, landing on top
+  #    of a write made while it was still starting. The loop below re-reads and
+  #    re-applies until the value sticks.
+  system.activationScripts.postActivation.text = ''
+    /bin/launchctl asuser "$(/usr/bin/id -u -- ${username})" \
+      /usr/bin/sudo --user=${username} -- /usr/bin/python3 - <<'PYTHON'
+    import plistlib, subprocess, time
+
+    def defaults(*args, **kw):
+        return subprocess.run(
+            ["/usr/bin/defaults", *args], capture_output=True, check=True, **kw
+        )
+
+    def downloads_tile(domain):
+        for tile in domain.get("persistent-others", []):
+            data = tile.get("tile-data", {})
+            url = data.get("file-data", {}).get("_CFURLString", "")
+            if url.rstrip("/").endswith("/Downloads"):
+                return data
+        return None
+
+    def read_state():
+        domain = plistlib.loads(defaults("export", "com.apple.dock", "-").stdout)
+        return domain, downloads_tile(domain)
+
+    # nix-darwin kills the Dock earlier in activation, and the relaunching Dock
+    # writes its own in-memory prefs back out -- which lands on top of anything
+    # written while it is still starting up. Wait for it to settle, then write
+    # and confirm, retrying if it gets clobbered anyway.
+    WANTED = (2, 1)  # arrangement 2 = Date Added (newest first), displayas 1 = Folder
+
+    for attempt in range(1, 6):
+        time.sleep(2)
+
+        domain, data = read_state()
+        if data is None:
+            print("dock-downloads: no Downloads tile in persistent-others")
+            break
+
+        if (data.get("arrangement"), data.get("displayas")) == WANTED:
+            print(f"dock-downloads: correct after {attempt} attempt(s)")
+            break
+
+        data["arrangement"], data["displayas"] = WANTED
+        defaults("import", "com.apple.dock", "-", input=plistlib.dumps(domain))
+    else:
+        print("dock-downloads: gave up after 5 attempts")
+
+    # Restart once at the end so the Dock picks up the final on-disk state.
+    subprocess.run(["/usr/bin/killall", "Dock"], capture_output=True)
+    PYTHON
+  '';
+
   # Add ability to used TouchID for sudo authentication (renamed in 25.05)
   security.pam.services.sudo_local.touchIdAuth = true;
 
