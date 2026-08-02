@@ -9,7 +9,7 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 ├── flake.nix              # Inputs, outputs, host definitions
 ├── flake.lock             # Pinned input revisions (generated)
 ├── modules/               # System (nix-darwin) modules
-│   ├── nix-core.nix       # Nix daemon: flakes, GC, store optimisation
+│   ├── nix-core.nix       # nix.enable = false (Determinate) + GC / optimise jobs
 │   ├── system.nix         # macOS defaults (dock, finder, trackpad, fonts, TouchID sudo)
 │   ├── apps.nix           # System packages + Homebrew (brews / casks / mas)
 │   └── host-users.nix     # Hostname & user account
