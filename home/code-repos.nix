@@ -6,6 +6,17 @@
 }: let
   codeDir = "${config.home.homeDirectory}/Code";
 
+  # Activation runs with a minimal PATH (bash, coreutils, findutils, ...) that
+  # has no `ssh`. Git resolves the ssh binary by name at runtime, so an SSH
+  # clone dies with "cannot run ssh: No such file or directory" unless we point
+  # it at an absolute path.
+  sshCommand = "${pkgs.openssh}/bin/ssh";
+
+  # Keys live in the 1Password agent (see home/git.nix). SSH_AUTH_SOCK is
+  # exported from .zshrc, which non-interactive activation never sources, so it
+  # has to be set explicitly here too.
+  onePasswordAgent = "${config.home.homeDirectory}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock";
+
   # Path under ~/Code -> clone URL.
   # Local directory names intentionally differ from some remote names.
   repos = {
@@ -26,7 +37,8 @@
   cloneOne = path: url: ''
     if [ ! -e ${lib.escapeShellArg "${codeDir}/${path}"}/.git ]; then
       echo "code-repos: cloning ${url} -> ~/Code/${path}"
-      if ! ${pkgs.git}/bin/git clone --recurse-submodules ${lib.escapeShellArg url} \
+      if ! ${pkgs.git}/bin/git -c core.sshCommand="${sshCommand}" \
+           clone --recurse-submodules ${lib.escapeShellArg url} \
            ${lib.escapeShellArg "${codeDir}/${path}"}; then
         echo "code-repos: WARNING failed to clone ${url} (skipping)" >&2
       fi
@@ -40,6 +52,7 @@ in {
   # Requires a usable SSH agent/key at activation time; individual failures
   # warn and are skipped rather than aborting the rebuild.
   home.activation.cloneCodeRepos = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    export SSH_AUTH_SOCK=${lib.escapeShellArg onePasswordAgent}
     ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg codeDir}
     ${lib.concatStrings (lib.mapAttrsToList cloneOne repos)}
   '';
