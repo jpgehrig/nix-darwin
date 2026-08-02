@@ -18,7 +18,12 @@
       cleanup = "none";
     };
 
-    taps = [];
+    # Third-party taps must be declared before a cask from them can be
+    # installed; newer Homebrew refuses casks from an untrusted tap with
+    # "Refusing to load cask ... from untrusted tap".
+    taps = [
+      "nikitabobko/tap" # aerospace
+    ];
 
     # Homebrew-first for fast-moving standalone binaries: nixpkgs follows the
     # 25.11 release branch and only lands new upstream versions at the next

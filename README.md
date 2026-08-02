@@ -161,6 +161,11 @@ The machine's hostname doesn't match the single host in `flake.nix`. Either fix
 **`error: unexpected value 'false' for '--determinate'`.** The installer flag is
 valueless as of v3.21.9; drop `=false` — see step 2.
 
+**`Error: Refusing to load cask <tap>/<cask> from untrusted tap <tap>`.** The
+cask's tap isn't declared in `homebrew.taps`. Referencing it inline as
+`"owner/tap/cask"` is not enough — newer Homebrew requires the tap itself to be
+listed so it is tapped first. Add it to `taps` in `modules/apps.nix`.
+
 **`error: Determinate detected, aborting activation`.** `nix.enable = false` is
 missing from `modules/nix-core.nix`. nix-darwin and `determinate-nixd` both want
 to own `/etc/nix/nix.conf` and the daemon, so nix-darwin refuses unless told to
