@@ -29,7 +29,7 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    xcode-select --install
    ```
 
-2. **Install Nix** — upstream Nix via the Determinate Systems installer (flakes enabled, clean uninstall):
+2. **Install Nix** — Determinate Nix (flakes enabled, clean uninstall):
    ```sh
    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
      | sh -s -- install
@@ -52,9 +52,23 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    > `https://github.com/` → `git@github.com:`, so this same command would
    > require SSH that isn't set up until step 9.
 
-5. **Adjust identity** in `flake.nix` (`username`, `useremail`, `useremailWork`, `hostname`) if you're not me. `hostname` must match the flake output you activate in step 7 (`.#jps-macbook`), and it sets the machine's network name via `modules/host-users.nix`.
+5. **Set the hostname and identity** in `flake.nix` — `username`, `useremail`, `useremailWork`, and `hostname`.
 
-   If you're using a different SSH key, also update `sshPublicKey` in `home/git.nix` — commits are signed with it and activation will configure signing regardless of whether the key exists yet.
+   `hostname` does double duty: it names the flake output you activate in step 7
+   (`.#<hostname>`) *and* becomes the machine's ComputerName / LocalHostName /
+   NetBIOSName via `modules/host-users.nix`. Set it **before** bootstrapping —
+   e.g. `jps-macbook` for a new MacBook:
+
+   ```nix
+   hostname = "jps-macbook";
+   ```
+
+   The config defines a single host, so a fresh Mac whose name doesn't match
+   fails with `flake output attribute 'darwinConfigurations.<name>' does not exist`.
+   Editing this value first avoids activating under the wrong name and having to
+   rename afterwards.
+
+   If you're using a different SSH key, also update `sshPublicKey` in `home/git.nix` — commits are signed with it and activation will configure signing regardless of whether the key exists yet. Generate one per machine so a lost Mac can be revoked on its own.
 
 6. **Move aside installer-managed shell files** so nix-darwin can take them over (otherwise activation aborts with "Unexpected files in /etc"):
    ```sh
@@ -62,11 +76,24 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    sudo mv /etc/zshrc  /etc/zshrc.before-nix-darwin  2>/dev/null || true
    ```
 
-7. **Bootstrap nix-darwin** — activation must run as root since 25.05. On the very first run, flakes aren't enabled in root's nix config yet, so pass them inline:
+   > **This removes `nix` from new shells.** The installer put its PATH hook in
+   > `/etc/zshrc`, and you just moved that file. Existing shells keep working;
+   > new ones report `nix: command not found` until step 7 finishes and
+   > nix-darwin writes its own `/etc/zshrc`. Don't restore the backup — instead
+   > source the profile in whichever shell runs step 7:
+   > ```sh
+   > . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+   > ```
+
+7. **Bootstrap nix-darwin** — activation must run as root since 25.05. On the very first run, flakes aren't enabled in root's nix config yet, so pass them inline. Substitute the `hostname` you set in step 5:
    ```sh
    sudo -H nix --extra-experimental-features 'nix-command flakes' \
-     run nix-darwin/nix-darwin-25.11#darwin-rebuild -- switch --flake .#jps-macbook
+     run nix-darwin/nix-darwin-25.11#darwin-rebuild -- switch --flake .#<hostname>
    ```
+
+   The explicit `.#<hostname>` is needed only on this first run, while the
+   machine still has its factory name. Activation renames it to match, so later
+   rebuilds resolve automatically.
 
    After the first activation, `modules/nix-core.nix` enables `nix-command` and `flakes` daemon-wide, so subsequent rebuilds simplify to:
    ```sh
@@ -110,6 +137,34 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 10. **Set your terminal font** to *JetBrainsMono Nerd Font* (installed by the `font-jetbrains-mono-nerd-font` cask). Without it, `eza --icons` and any Nerd Font glyphs in the Starship prompt render as tofu.
 
 11. **Open a new shell** to pick up zsh, Starship, atuin and direnv.
+
+## Troubleshooting
+
+**`nix: command not found` in new terminals, but sourcing the profile works.**
+Step 6 moved `/etc/zshrc`, which held the installer's PATH hook, and nix-darwin
+has not written its replacement yet. Don't restore the backup — source the
+profile and finish the bootstrap:
+
+```sh
+. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+sudo -H nix --extra-experimental-features 'nix-command flakes' \
+  run nix-darwin/nix-darwin-25.11#darwin-rebuild -- switch --flake .#<hostname>
+```
+
+New shells work permanently once activation succeeds. If `/nix` itself is
+missing, the install never completed — re-run step 2.
+
+**`flake output attribute 'darwinConfigurations.<name>' does not exist`.**
+The machine's hostname doesn't match the single host in `flake.nix`. Either fix
+`hostname` there (step 5) or pass the right one explicitly with `--flake .#<hostname>`.
+
+**`error: unexpected value 'false' for '--determinate'`.** The installer flag is
+valueless as of v3.21.9; drop `=false` — see step 2.
+
+**`error: Determinate detected, aborting activation`.** `nix.enable = false` is
+missing from `modules/nix-core.nix`. nix-darwin and `determinate-nixd` both want
+to own `/etc/nix/nix.conf` and the daemon, so nix-darwin refuses unless told to
+stand back. This repo already sets it — pull the latest config.
 
 ## GitHub authentication
 
@@ -166,6 +221,7 @@ darwin-rebuild switch --rollback
 ## Notes
 
 - Targets `aarch64-darwin` (Apple Silicon). Change `system` in `flake.nix` for Intel Macs.
+- Nix itself is managed by **Determinate** (`determinate-nixd`), so `modules/nix-core.nix` sets `nix.enable = false` and the `nix.*` options are unavailable. Daemon settings live in `/etc/nix/nix.custom.conf`; weekly GC (Sun 03:00) and store optimisation (Sun 04:00) are installed as plain `launchd.daemons` instead, logging to `/var/log/nix-gc.log` and `/var/log/nix-optimise.log`.
 - Home Manager is wired in as a `darwin` module (`useGlobalPkgs = true`), so packages share the system `nixpkgs` and config.
 - Conflicting files written by Home Manager are backed up with the `.hm-backup` suffix.
 - TouchID for `sudo` is enabled via `security.pam.services.sudo_local.touchIdAuth`.
@@ -193,6 +249,6 @@ rolls back with the generation.
 Re-check the gaps after `nix flake update` or a nixpkgs release bump:
 
 ```bash
-nix eval --raw .#darwinConfigurations.jps-macbook.pkgs.<pkg>.version
+nix eval --raw .#darwinConfigurations.<hostname>.pkgs.<pkg>.version
 brew info --json=v2 --formula <pkg> | jq -r '.formulae[0].versions.stable'
 ```
