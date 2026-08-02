@@ -5,9 +5,9 @@
   useremailWork,
   ...
 }: let
-  # Public half of the 1Password SSH key "GitHub Jayme's MBP".
+  # Public half of the 1Password SSH key "GitHub JP's MBP".
   # Safe to commit; the private key stays in the vault.
-  sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBvwyQa1LLR0vSqkTz32OkqtQOJgLbiFhkDOoIfMBHuG";
+  sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBEAoKENKgXb2fqgDJAJcMuwddbVJdmxeQ1mo7BQaCHm";
 
   # 1Password's SSH agent socket (fixed path, set by the desktop app).
   onePasswordAgent = "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock";
@@ -60,7 +60,7 @@ in {
       user = {
         name = username;
         email = useremail;
-        # SSH public key from the 1Password item "GitHub Jayme's MBP".
+        # SSH public key from the 1Password item "GitHub JP's MBP".
         # The private half never leaves the vault; signing goes through the
         # 1Password SSH agent and prompts for Touch ID.
         signingkey = sshPublicKey;

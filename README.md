@@ -83,10 +83,18 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    b. **Register the key on GitHub, in both roles.** GitHub tracks authentication and signing keys separately; the same key must be added twice. Needs `gh` and `op` (both installed by step 7) with 1Password unlocked and `gh auth login` done. The token also needs scopes it won't have by default:
    ```sh
    gh auth refresh -h github.com -s admin:public_key,admin:ssh_signing_key
-   KEY="$(op item get "GitHub Jayme's MBP" --fields 'public key')"
+   KEY="$(op item get "GitHub JP's MBP" --fields 'public key')"
    gh ssh-key add --type authentication --title "1Password - $(hostname -s)" <(echo "$KEY")
    gh ssh-key add --type signing        --title "1Password - $(hostname -s)" <(echo "$KEY")
    ```
+
+   > One key per machine. On a new Mac, generate its own rather than reusing
+   > this one, so a lost machine can be revoked on its own:
+   > ```sh
+   > op item create --category "SSH Key" --title "GitHub <host>" \
+   >   --vault Personal --ssh-generate-key ed25519
+   > ```
+   > Then put its public half in `sshPublicKey` (`home/git.nix`) and rebuild.
 
    c. **Trust GitHub's host key** — a fresh Mac has no `~/.ssh/known_hosts`, and SSH fails closed with `Host key verification failed`:
    ```sh
