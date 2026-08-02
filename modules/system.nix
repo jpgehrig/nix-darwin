@@ -140,6 +140,12 @@
         };
         # Prevent Photos from opening automatically when devices are plugged in
         "com.apple.ImageCapture".disableHotPlug = true;
+
+        # Bind Cmd+Space to Raycast instead of Spotlight.
+        # 49 is the `space` keycode; the modifier is spelled out by name.
+        # Raycast reads this on launch; the matching Spotlight hotkey is
+        # disabled via `com.apple.symbolichotkeys` in the activation script below.
+        "com.raycast.macos".raycastGlobalHotkey = "Command-49";
       };
 
       loginwindow = {
@@ -165,6 +171,37 @@
       swapLeftCommandAndLeftAlt = false;
     };
   };
+
+  # Disable Spotlight's Cmd+Space so Raycast can claim it.
+  #
+  # This can't go in `system.defaults.CustomUserPreferences`: that runs a flat
+  # `defaults write`, and entry 64 is a nested dict inside AppleSymbolicHotKeys.
+  # Writing it wholesale would clobber every other symbolic hotkey, so we edit
+  # just the one `enabled` field with PlistBuddy.
+  #
+  # 64 = "Show Spotlight search". (65, the Finder-search window on Opt+Cmd+Space,
+  # is left alone.) The cfprefsd/SystemUIServer dance is required because the
+  # hotkey table is cached in memory - without it the change only lands on relogin.
+  #
+  # Activation runs as root, so every step is wrapped in `sudo -u` to land in the
+  # user's preference domain rather than root's.
+  system.activationScripts.postActivation.text = ''
+    plist="/Users/${username}/Library/Preferences/com.apple.symbolichotkeys.plist"
+    pb=/usr/libexec/PlistBuddy
+    as_user="/usr/bin/sudo -u ${username}"
+
+    if [ -f "$plist" ]; then
+      if $as_user "$pb" -c "Print :AppleSymbolicHotKeys:64:enabled" "$plist" >/dev/null 2>&1; then
+        current=$($as_user "$pb" -c "Print :AppleSymbolicHotKeys:64:enabled" "$plist")
+        if [ "$current" != "false" ]; then
+          echo "disabling Spotlight Cmd+Space hotkey (freeing it for Raycast)"
+          $as_user "$pb" -c "Set :AppleSymbolicHotKeys:64:enabled false" "$plist"
+          $as_user /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+          $as_user /usr/bin/killall SystemUIServer >/dev/null 2>&1 || true
+        fi
+      fi
+    fi
+  '';
 
   # Add ability to used TouchID for sudo authentication (renamed in 25.05)
   security.pam.services.sudo_local.touchIdAuth = true;
