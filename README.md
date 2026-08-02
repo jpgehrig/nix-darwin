@@ -175,6 +175,11 @@ The command refuses to run while Zen is open (`pgrep -x zen`): Zen holds the
 session store in memory and would overwrite it on exit, silently discarding the
 restore.
 
+The script runs under `uv` (from nixpkgs, pinned by the wrapper) and declares its
+own `lz4` dependency inline (PEP 723). The first run fetches that wheel and
+caches it in `~/.cache/uv`, so it needs network access once; afterwards it is
+offline.
+
 ### What is and isn't managed
 
 Managed: Space names, icons and gradient themes; the five custom containers

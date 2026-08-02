@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["lz4"]
+# ///
 """Restore Zen Spaces, containers and pinned tabs from config/zen/spaces.json.
 
 Zen is installed via Homebrew cask, so its profile is not managed by nix. This
