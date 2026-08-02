@@ -29,6 +29,14 @@
 
       export PATH="$PATH:$HOME/bin:$HOME/.local/bin:$HOME/go/bin"
 
+      # Point at the 1Password SSH agent (see home/git.nix). `ssh` itself gets
+      # this from IdentityAgent in ~/.ssh/config, but git's SSH commit signing
+      # shells out to ssh-keygen, which ignores ssh_config and reads only
+      # SSH_AUTH_SOCK. Without this, auth works while commits fail with
+      # "Couldn't find key in agent?". macOS presets this to its own launchd
+      # agent, so it must be overridden here rather than merely defaulted.
+      export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+
       # Drop duplicate PATH entries, keeping the first (Nix) occurrence.
       typeset -U path PATH
 

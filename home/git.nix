@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   username,
   useremail,
@@ -10,7 +11,8 @@
   sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBEAoKENKgXb2fqgDJAJcMuwddbVJdmxeQ1mo7BQaCHm";
 
   # 1Password's SSH agent socket (fixed path, set by the desktop app).
-  onePasswordAgent = "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock";
+  # Absolute, not ~-relative: SSH_AUTH_SOCK below does not expand tildes.
+  onePasswordAgent = "${config.home.homeDirectory}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock";
 in {
   # `programs.git` generates ~/.config/git/config — remove any stale ~/.gitconfig
   home.activation.removeExistingGitconfig = lib.hm.dag.entryBefore ["checkLinkTargets"] ''
