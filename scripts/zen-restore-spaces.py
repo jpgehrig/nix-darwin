@@ -155,8 +155,16 @@ def plan_containers(profile: Path, cfg: dict) -> tuple[dict, list[dict]]:
     return data, added
 
 
-def merge(session: dict, cfg: dict, cmap: dict[str, int]) -> dict:
-    """Apply spaces.json onto a decoded session, returning a new session."""
+def merge(
+    session: dict, cfg: dict, cmap: dict[str, int], prune: bool = False
+) -> tuple[dict, list[dict]]:
+    """Apply spaces.json onto a decoded session.
+
+    Returns the new session and the list of Spaces pruned from it (empty unless
+    prune=True). The merge is additive by default: Spaces the profile has that
+    the config does not mention are left alone, because they may hold tabs this
+    tool does not manage.
+    """
     out = json.loads(json.dumps(session))  # deep copy
     by_uuid = {s["uuid"]: s for s in out.get("spaces", [])}
     # uuids are minted per profile, so a fresh Mac's Spaces never carry the
@@ -240,6 +248,46 @@ def merge(session: dict, cfg: dict, cmap: dict[str, int]) -> dict:
                 }
             )
     out["tabs"] = kept
+
+    pruned: list[dict] = []
+    if prune:
+        # Drop Spaces the config does not describe, and every tab bound to
+        # them. Deleting a Space without its tabs would leave them orphaned:
+        # referenced by a zenWorkspace uuid that no longer exists.
+        keep_uuids = set(uuid_remap.values())
+        pruned = [s for s in out.get("spaces", []) if s["uuid"] not in keep_uuids]
+        dead = {s["uuid"] for s in pruned}
+        out["spaces"] = [s for s in out.get("spaces", []) if s["uuid"] not in dead]
+        out["tabs"] = [t for t in out["tabs"] if t.get("zenWorkspace") not in dead]
+
+    return out, pruned
+
+
+def prune_cost(session: dict, cfg: dict, cmap: dict[str, int]) -> list[dict]:
+    """What --prune would destroy: each doomed Space and its tab counts.
+
+    Reported before writing because tabs are not recoverable from spaces.json
+    -- only pinned tabs are captured, so any unpinned tab in a pruned Space is
+    gone for good.
+    """
+    _, would_prune = merge(session, cfg, cmap, prune=True)
+    out = []
+    for space in would_prune:
+        tabs = [
+            t for t in session.get("tabs", []) if t.get("zenWorkspace") == space["uuid"]
+        ]
+        out.append(
+            {
+                "name": space.get("name") or "(unnamed)",
+                "uuid": space["uuid"],
+                "pinned": sum(
+                    1 for t in tabs if t.get("pinned") or t.get("zenEssential")
+                ),
+                "unpinned": sum(
+                    1 for t in tabs if not (t.get("pinned") or t.get("zenEssential"))
+                ),
+            }
+        )
     return out
 
 
@@ -395,6 +443,21 @@ def main() -> int:
         action="store_true",
         help="write the profile's current Spaces back out to spaces.json",
     )
+    ap.add_argument(
+        "--prune",
+        action="store_true",
+        help="delete Spaces not described by spaces.json, and their tabs",
+    )
+    ap.add_argument(
+        "--replace",
+        action="store_true",
+        help="alias for --prune: end with exactly the Spaces in spaces.json",
+    )
+    ap.add_argument(
+        "--force",
+        action="store_true",
+        help="allow --prune to discard unpinned tabs (they are not captured)",
+    )
     args = ap.parse_args()
 
     cfg_path = (
@@ -435,9 +498,25 @@ def main() -> int:
         cdata, added = plan_containers(profile, cfg)
         cmap = container_map(profile)
         cmap.update({i["name"]: i["userContextId"] for i in added})
-        merged = merge(session, cfg, cmap)
+        prune = args.prune or args.replace
+        doomed = prune_cost(session, cfg, cmap) if prune else []
+        merged, _ = merge(session, cfg, cmap, prune=prune)
     except Failed as exc:
         print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    # Only pinned tabs live in spaces.json, so an unpinned tab in a pruned
+    # Space cannot be restored from anywhere. Require --force for that.
+    lost = sum(d["unpinned"] for d in doomed)
+    if lost and not args.force and not args.dry_run:
+        print(
+            f"error: --prune would delete {lost} unpinned tab(s) in "
+            f"{len([d for d in doomed if d['unpinned']])} Space(s).\n"
+            "       Unpinned tabs are not captured in spaces.json, so they\n"
+            "       cannot be restored. Re-run with --dry-run to see them, or\n"
+            "       --force to discard them.",
+            file=sys.stderr,
+        )
         return 1
 
     before, after = managed_view(session, cmap), managed_view(merged, cmap)
@@ -454,7 +533,12 @@ def main() -> int:
             f"+ container {ident['name']!r} "
             f"(id {ident['userContextId']}, {ident['color']}/{ident['icon']})"
         )
-    if not diff and not added:
+    for d in doomed:
+        print(
+            f"- space {d['name']!r} "
+            f"({d['pinned']} pinned, {d['unpinned']} unpinned tab(s) deleted)"
+        )
+    if not diff and not added and not doomed:
         print("no changes: profile already matches spaces.json")
         if args.dry_run:
             return 0

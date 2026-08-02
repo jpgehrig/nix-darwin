@@ -199,6 +199,31 @@ changes made in that session may not have been flushed to disk yet.
 Run it from the repo root: it writes to `./config/zen/spaces.json` by default,
 and refuses (non-zero, with a message) if pointed at the read-only store copy.
 
+### Removing Spaces the config doesn't describe
+
+Restore is **additive** by default: a Space the profile has but `spaces.json`
+doesn't mention is left alone, because it may hold tabs this tool doesn't
+manage. To end up with exactly the Spaces in the config:
+
+```sh
+zen-restore-spaces --prune --dry-run   # lists each Space that would go, with tab counts
+zen-restore-spaces --prune
+```
+
+`--replace` is an alias for `--prune`.
+
+Deleting a Space also deletes its tabs — leaving them would orphan them against
+a Space uuid that no longer exists. Only *pinned* tabs are captured in
+`spaces.json`, so unpinned ones cannot be restored. If a pruned Space holds any,
+the command refuses:
+
+```
+error: --prune would delete 3 unpinned tab(s) in 1 Space(s).
+```
+
+Pass `--force` to discard them anyway. Pruning a Space does **not** delete its
+container or its cookies; those live outside the session store.
+
 ### What is and isn't managed
 
 Managed: Space names, icons and gradient themes; the five custom containers
