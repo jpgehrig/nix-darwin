@@ -26,9 +26,10 @@
       "googleworkspace-cli"
       "imagemagick"
       "mas"
-      # node/pnpm stay on Homebrew deliberately: nixpkgs 25.11 ships node 24 and
-      # pnpm 10, while Homebrew tracks node 26 / pnpm 11. Revisit on the next
+      # gh/node/pnpm stay on Homebrew deliberately: nixpkgs 25.11 lags behind
+      # (gh 2.83 vs 2.96, node 24 vs 26, pnpm 10 vs 11). Revisit on the next
       # nixpkgs release. Everything else here is either macOS-only or not packaged.
+      "gh"
       "node"
       "pnpm"
       "tf-summarize"

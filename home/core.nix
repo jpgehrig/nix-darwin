@@ -22,7 +22,6 @@
     hyperfine # command-line benchmarking tool
 
     # dev tooling (moved off Homebrew)
-    gh # GitHub CLI
     pdm # Python package manager
     opentofu # open-source Terraform fork; replaces the broken tfenv setup
     python313 # default interpreter; project envs come from direnv/pdm
