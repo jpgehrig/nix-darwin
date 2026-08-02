@@ -18,19 +18,36 @@
   # python env on PATH and did exactly that, which silently picked up whatever
   # interpreter came first -- Homebrew python, a pyenv shim, an active venv --
   # and failed with "No module named 'lz4'" on a machine whose PATH differed.
+  uvGuard = ''
+    if ! command -v uv >/dev/null; then
+      echo "error: uv not found on PATH." >&2
+      echo "       It is declared as a brew in modules/apps.nix -- run" >&2
+      echo "       'darwin-rebuild switch' (or 'brew install uv') first." >&2
+      exit 1
+    fi
+  '';
+
   zen-restore-spaces = pkgs.writeShellApplication {
     name = "zen-restore-spaces";
     text = ''
-      if ! command -v uv >/dev/null; then
-        echo "error: uv not found on PATH." >&2
-        echo "       It is declared as a brew in modules/apps.nix -- run" >&2
-        echo "       'darwin-rebuild switch' (or 'brew install uv') first." >&2
-        exit 1
-      fi
+      ${uvGuard}
       exec uv run --script ${./../scripts/zen-restore-spaces.py} \
         --config "''${ZEN_SPACES_CONFIG:-${./../config/zen/spaces.json}}" "$@"
     '';
   };
+
+  # The inverse: pull the live profile's Spaces back into the repo. Unlike
+  # restore this writes to your working copy, so it defaults --config to
+  # ./config/zen/spaces.json rather than the read-only store path, and must be
+  # run from the repo (or pointed at it with --config).
+  zen-backup-spaces = pkgs.writeShellApplication {
+    name = "zen-backup-spaces";
+    text = ''
+      ${uvGuard}
+      exec uv run --script ${./../scripts/zen-restore-spaces.py} --capture \
+        --config "''${ZEN_SPACES_CONFIG:-./config/zen/spaces.json}" "$@"
+    '';
+  };
 in {
-  home.packages = [zen-restore-spaces];
+  home.packages = [zen-restore-spaces zen-backup-spaces];
 }

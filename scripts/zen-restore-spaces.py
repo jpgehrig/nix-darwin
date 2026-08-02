@@ -289,11 +289,96 @@ def managed_view(session: dict, cmap: dict[str, int]) -> dict:
     return {"spaces": spaces}
 
 
+def capture(profile: Path) -> dict:
+    """Build a spaces.json from a live profile -- the inverse of merge().
+
+    Deliberately built on managed_view() rather than a parallel extractor, so
+    "what this tool manages" has exactly one definition and capture cannot
+    drift out of sync with restore.
+
+    Two things managed_view() omits are added back: the per-Space uuid (restore
+    uses it as a fallback match when a Space has been renamed) and the custom
+    container definitions.
+    """
+    session = decode(profile / "zen-sessions.jsonlz4")
+    cmap = container_map(profile)
+    view = managed_view(session, cmap)
+
+    # managed_view drops uuid; re-attach it by name.
+    uuids = {s.get("name"): s.get("uuid") for s in session.get("spaces", [])}
+    for space in view["spaces"]:
+        space["uuid"] = uuids.get(space["name"])
+
+    # Only custom containers are declared -- Firefox recreates its own
+    # built-ins, so capturing them would add churn for nothing.
+    cont = json.loads((profile / "containers.json").read_text())
+    bound = {s["container"] for s in view["spaces"] if s.get("container")}
+    containers = [
+        {"color": i.get("color"), "icon": i.get("icon"), "key": i.get("name")}
+        for i in cont.get("identities", [])
+        if i.get("public") and not i.get("l10nId") and i.get("name") in bound
+    ]
+    containers.sort(key=lambda c: c["key"])
+
+    return {"$schema_version": 2, "containers": containers, "spaces": view["spaces"]}
+
+
 def render(obj) -> list[str]:
     return json.dumps(obj, indent=2, ensure_ascii=False).splitlines()
 
 
 # --------------------------------------------------------------------------
+
+
+def do_capture(profile: Path, cfg_path: Path, dry_run: bool) -> int:
+    """Write the profile's Spaces back out to spaces.json.
+
+    This writes to the repo, not the profile, so it needs no backup -- git is
+    the undo. It does not require Zen to be closed either, since it only reads;
+    but a running Zen may not have flushed recent changes to disk, so say so
+    rather than quietly capturing stale state.
+    """
+    try:
+        captured = capture(profile)
+    except Failed as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    print(f"profile: {profile}")
+    if zen_running():
+        print(
+            "warning: Zen is running -- changes made in this session may not be\n"
+            "         on disk yet. Quit Zen and re-run if anything looks stale.",
+            file=sys.stderr,
+        )
+
+    new = render(captured)
+    old = render(json.loads(cfg_path.read_text())) if cfg_path.exists() else []
+    diff = list(
+        difflib.unified_diff(old, new, str(cfg_path), "captured", lineterm="")
+    )
+    if not diff:
+        print(f"no changes: {cfg_path} already matches the profile")
+        return 0
+    for line in diff:
+        print(line)
+
+    if dry_run:
+        print(f"\n--dry-run: nothing written ({len(diff)} diff lines)")
+        return 0
+
+    if not os.access(cfg_path.parent, os.W_OK):
+        print(
+            f"\nerror: {cfg_path.parent} is not writable.\n"
+            "       The wrapper defaults to the read-only copy in the Nix store;\n"
+            "       pass --config ./config/zen/spaces.json to write to the repo.",
+            file=sys.stderr,
+        )
+        return 1
+
+    cfg_path.write_text(json.dumps(captured, indent=2, ensure_ascii=False) + "\n")
+    print(f"\nwrote {cfg_path}")
+    return 0
 
 
 def main() -> int:
@@ -305,6 +390,11 @@ def main() -> int:
         action="store_true",
         help="print a diff of what would change; write nothing",
     )
+    ap.add_argument(
+        "--capture",
+        action="store_true",
+        help="write the profile's current Spaces back out to spaces.json",
+    )
     args = ap.parse_args()
 
     cfg_path = (
@@ -312,7 +402,7 @@ def main() -> int:
         if args.config
         else Path(__file__).resolve().parent.parent / "config/zen/spaces.json"
     )
-    if not cfg_path.exists():
+    if not cfg_path.exists() and not args.capture:
         print(f"error: no config at {cfg_path}", file=sys.stderr)
         return 1
 
@@ -321,6 +411,9 @@ def main() -> int:
     except Failed as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
+
+    if args.capture:
+        return do_capture(profile, cfg_path, args.dry_run)
 
     # Refuse to touch live state while the app owns it. Checked even for
     # --dry-run so the diff reflects a quiescent file.

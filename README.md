@@ -20,11 +20,11 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 │   ├── git.nix            # git + delta + SSH auth & commit signing (1Password)
 │   ├── starship.nix       # prompt
 │   ├── vscode.nix         # VSCodium
-│   └── zen.nix            # `zen-restore-spaces` wrapper (Zen is a cask, not nix)
+│   └── zen.nix            # zen-backup-spaces / zen-restore-spaces wrappers
 ├── config/
 │   └── zen/spaces.json    # Zen Spaces, containers & pinned tabs (source of truth)
 └── scripts/
-    └── zen-restore-spaces.py  # Replays spaces.json onto a Zen profile
+    └── zen-restore-spaces.py  # Captures (--capture) and replays spaces.json
 ```
 
 ## Setting up a new Mac
@@ -181,6 +181,24 @@ that wheel and caches it in `~/.cache/uv`, so it needs network access once;
 afterwards it is offline. On a fresh Mac this means `brew bundle` must have run —
 if uv is missing the command says so and exits non-zero.
 
+### Capturing changes back
+
+After changing Spaces, containers or pins in Zen, pull them back into the repo:
+
+```sh
+cd ~/.config/nix-darwin
+zen-backup-spaces --dry-run   # show what changed
+zen-backup-spaces             # rewrite config/zen/spaces.json
+git diff config/zen/spaces.json
+```
+
+This only reads the profile, so it needs no backup — git is the undo. It does
+not require Zen to be closed either, but it warns if Zen is running, since
+changes made in that session may not have been flushed to disk yet.
+
+Run it from the repo root: it writes to `./config/zen/spaces.json` by default,
+and refuses (non-zero, with a message) if pointed at the read-only store copy.
+
 ### What is and isn't managed
 
 Managed: Space names, icons and gradient themes; the five custom containers
@@ -302,6 +320,7 @@ darwin-rebuild switch --rollback
 | `nix flake check` | Evaluate the flake without building |
 | `nix fmt` | Format `.nix` files with alejandra |
 | `nix-collect-garbage -d` | Delete old generations now (weekly GC also runs automatically) |
+| `zen-backup-spaces` | Capture live Zen Spaces back into `config/zen/spaces.json` |
 | `zen-restore-spaces --dry-run` | Preview restoring Zen Spaces from `config/zen/spaces.json` (Zen must be closed) |
 
 ## Notes
