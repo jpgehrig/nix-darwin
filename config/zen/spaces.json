@@ -177,6 +177,55 @@
       "uuid": "{268b5e9c-13d6-4f02-ba9a-2188ffbcbab9}"
     },
     {
+      "container": "Home",
+      "icon": "🏠️",
+      "name": "Home",
+      "pins": [
+        {
+          "essential": true,
+          "icon": null,
+          "label": "Inbox (692) - jp.gehrig@gmail.com - Gmail",
+          "url": "https://mail.google.com/mail/u/0/#inbox"
+        },
+        {
+          "essential": false,
+          "icon": null,
+          "label": "Etsy - Shopping Cart",
+          "url": "https://www.etsy.com/cart?ref=sidebar_cart_view_listing"
+        },
+        {
+          "essential": false,
+          "icon": null,
+          "label": "NTS | Don't Assume",
+          "url": "https://www.nts.live/"
+        }
+      ],
+      "theme": {
+        "type": "gradient",
+        "gradientColors": [
+          {
+            "c": [
+              70,
+              236,
+              168
+            ],
+            "isCustom": false,
+            "algorithm": "floating",
+            "isPrimary": true,
+            "lightness": "60",
+            "position": {
+              "x": 147,
+              "y": 195
+            },
+            "type": "explicit-lightness"
+          }
+        ],
+        "opacity": 0.5,
+        "texture": 0
+      },
+      "uuid": "{96b56e24-9521-4374-9da9-ec2ed3588689}"
+    },
+    {
       "container": "Init7",
       "icon": "🔌",
       "name": "Init7",
@@ -242,55 +291,6 @@
         "texture": 0
       },
       "uuid": "{41c51965-ea6b-4127-977b-c0e396735fc6}"
-    },
-    {
-      "container": "Home",
-      "icon": "🏠️",
-      "name": "Home",
-      "pins": [
-        {
-          "essential": true,
-          "icon": null,
-          "label": "Inbox (692) - jp.gehrig@gmail.com - Gmail",
-          "url": "https://mail.google.com/mail/u/0/#inbox"
-        },
-        {
-          "essential": false,
-          "icon": null,
-          "label": "Etsy - Shopping Cart",
-          "url": "https://www.etsy.com/cart?ref=sidebar_cart_view_listing"
-        },
-        {
-          "essential": false,
-          "icon": null,
-          "label": "NTS | Don't Assume",
-          "url": "https://www.nts.live/"
-        }
-      ],
-      "theme": {
-        "type": "gradient",
-        "gradientColors": [
-          {
-            "c": [
-              70,
-              236,
-              168
-            ],
-            "isCustom": false,
-            "algorithm": "floating",
-            "isPrimary": true,
-            "lightness": "60",
-            "position": {
-              "x": 147,
-              "y": 195
-            },
-            "type": "explicit-lightness"
-          }
-        ],
-        "opacity": 0.5,
-        "texture": 0
-      },
-      "uuid": "{96b56e24-9521-4374-9da9-ec2ed3588689}"
     }
   ]
 }

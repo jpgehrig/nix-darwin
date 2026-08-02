@@ -175,10 +175,11 @@ The command refuses to run while Zen is open (`pgrep -x zen`): Zen holds the
 session store in memory and would overwrite it on exit, silently discarding the
 restore.
 
-The script runs under `uv` (from nixpkgs, pinned by the wrapper) and declares its
-own `lz4` dependency inline (PEP 723). The first run fetches that wheel and
-caches it in `~/.cache/uv`, so it needs network access once; afterwards it is
-offline.
+The script runs under `uv` (the brew from `modules/apps.nix`, resolved from PATH)
+and declares its own `lz4` dependency inline (PEP 723). The first run fetches
+that wheel and caches it in `~/.cache/uv`, so it needs network access once;
+afterwards it is offline. On a fresh Mac this means `brew bundle` must have run —
+if uv is missing the command says so and exits non-zero.
 
 ### What is and isn't managed
 
