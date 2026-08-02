@@ -15,10 +15,11 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 │   └── host-users.nix     # Hostname & user account
 └── home/                  # Home Manager (user-level) modules
     ├── default.nix        # Entry point, imports the rest
-    ├── core.nix           # CLI tools (ripgrep, fzf, eza, bat, yazi, zoxide, …)
+    ├── core.nix           # CLI tools (ripgrep, fzf, eza, bat, yazi, zoxide, atuin, …)
     ├── shell.nix          # zsh + direnv + aliases
-    ├── git.nix            # git + delta + aliases
-    └── starship.nix       # prompt
+    ├── git.nix            # git + delta + SSH auth & commit signing (1Password)
+    ├── starship.nix       # prompt
+    └── vscode.nix         # VSCodium
 ```
 
 ## Setting up a new Mac
@@ -40,14 +41,20 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
-4. **Clone this repo**:
+4. **Clone this repo** (public, so HTTPS needs no auth at this point):
    ```sh
    mkdir -p ~/.config && cd ~/.config
    git clone https://github.com/jpgehrig/nix-darwin.git
    cd nix-darwin
    ```
 
-5. **Adjust identity** in `flake.nix` (`username`, `useremail`, `hostname`) if you're not me.
+   > Clone **before** activating. Afterwards `home/git.nix` rewrites
+   > `https://github.com/` → `git@github.com:`, so this same command would
+   > require SSH that isn't set up until step 9.
+
+5. **Adjust identity** in `flake.nix` (`username`, `useremail`, `useremailWork`, `hostname`) if you're not me. `hostname` must match the flake output you activate in step 7 (`.#jps-mbp`), and it sets the machine's network name via `modules/host-users.nix`.
+
+   If you're using a different SSH key, also update `sshPublicKey` in `home/git.nix` — commits are signed with it and activation will configure signing regardless of whether the key exists yet.
 
 6. **Move aside installer-managed shell files** so nix-darwin can take them over (otherwise activation aborts with "Unexpected files in /etc"):
    ```sh
@@ -67,7 +74,62 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    ```
    (or just `rebuild` — aliased in `home/shell.nix`).
 
-8. **Sign in to the Mac App Store** before the first rebuild if `masApps` is non-empty (otherwise `mas` install will fail).
+8. **Sign in to the Mac App Store** before the first rebuild — `masApps` is non-empty (Dropover, NordVPN, WhatsApp, Windows App), and `mas` install fails otherwise.
+
+9. **Set up GitHub SSH auth.** Activation configures SSH auth *and* commit signing through the 1Password agent, but none of it works until you do these three things. **Until then `git commit` fails** with `Couldn't find key in agent?` — see [GitHub authentication](#github-authentication) for why, and for the escape hatch if you need git working before finishing this.
+
+   a. **Enable the agent**: 1Password app → Settings → Developer → Set Up SSH Agent. This creates the socket `~/.ssh/config` already points at.
+
+   b. **Register the key on GitHub, in both roles.** GitHub tracks authentication and signing keys separately; the same key must be added twice. Needs `gh` and `op` (both installed by step 7) with 1Password unlocked and `gh auth login` done. The token also needs scopes it won't have by default:
+   ```sh
+   gh auth refresh -h github.com -s admin:public_key,admin:ssh_signing_key
+   KEY="$(op item get "GitHub Jayme's MBP" --fields 'public key')"
+   gh ssh-key add --type authentication --title "1Password - $(hostname -s)" <(echo "$KEY")
+   gh ssh-key add --type signing        --title "1Password - $(hostname -s)" <(echo "$KEY")
+   ```
+
+   c. **Trust GitHub's host key** — a fresh Mac has no `~/.ssh/known_hosts`, and SSH fails closed with `Host key verification failed`:
+   ```sh
+   mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+   ```
+
+   Verify:
+   ```sh
+   ssh -T git@github.com          # "Hi jpgehrig! You've successfully authenticated"
+   git -C ~/.config/nix-darwin log --show-signature -1
+   ```
+
+10. **Set your terminal font** to *JetBrainsMono Nerd Font* (installed by the `font-jetbrains-mono-nerd-font` cask). Without it, `eza --icons` and any Nerd Font glyphs in the Starship prompt render as tofu.
+
+11. **Open a new shell** to pick up zsh, Starship, atuin and direnv.
+
+## GitHub authentication
+
+Git talks to GitHub over SSH, with the key held in 1Password:
+
+- The private key never lands on disk. `programs.ssh` points `IdentityAgent` at
+  the 1Password agent socket, so every use prompts for Touch ID.
+- The same key signs commits and tags (`gpg.format = ssh`). `allowed_signers`
+  covers both the personal and work identities, so `git log --show-signature`
+  verifies locally; GitHub verifies against the key registered on your account.
+- `url."git@github.com:".insteadOf = "https://github.com/"` means HTTPS remotes
+  are transparently upgraded — no need to edit remotes on existing clones.
+
+**If git breaks before the agent is up** (fresh machine, 1Password locked, key
+not yet registered), bypass the rewrite with an empty global config:
+
+```sh
+GIT_CONFIG_GLOBAL=/dev/null git push https://github.com/jpgehrig/nix-darwin.git <branch>
+```
+
+`git -c url."git@github.com:".insteadOf= …` does **not** work: git merges
+`insteadOf` values rather than replacing them, so the rewrite still applies.
+
+To commit without signing while the agent is unavailable:
+
+```sh
+git -c commit.gpgsign=false commit -m "…"
+```
 
 ## Updating inputs
 
