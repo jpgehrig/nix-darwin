@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import hashlib
 import json
 import os
 import shutil
@@ -230,18 +231,46 @@ def merge(
         )
     ]
     for want in cfg.get("spaces", []):
+        space_uuid = uuid_remap[want["uuid"]]
+        # Pins inherit their Space's container. A pinned tab with no
+        # userContextId is not bound to the container at all.
+        ctx = 0
+        for s in out.get("spaces", []):
+            if s["uuid"] == space_uuid:
+                ctx = s.get("containerTabId") or 0
+                break
         for i, pin in enumerate(want.get("pins", [])):
+            # Every pin Zen writes carries these; a synthesized tab missing
+            # them is not picked up as a pin. zenSyncId in particular is Zen's
+            # identity for a pinned tab (real ones look like "<ms>-<counter>").
+            # Derive it from the URL so re-running produces the same id and the
+            # restore stays idempotent, rather than minting a new one per run.
+            digest = hashlib.sha1(
+                f"{space_uuid}\0{pin['url']}".encode()
+            ).hexdigest()
+            sync_id = f"{int(digest[:11], 16)}-{i}"
             kept.append(
                 {
+                    "attributes": {},
                     "entries": [{"url": pin["url"], "title": pin.get("label")}],
+                    "hidden": False,
                     "index": 1,
                     "pinned": True,
-                    "hidden": False,
+                    "searchMode": None,
+                    "userContextId": ctx,
+                    "userTypedClear": 0,
+                    "userTypedValue": None,
+                    "zenDefaultUserContextId": "true",
                     "zenEssential": bool(pin.get("essential")),
-                    "zenWorkspace": uuid_remap[want["uuid"]],
-                    "zenPinnedIcon": pin.get("icon"),
+                    "zenGlanceId": None,
                     "zenHasStaticIcon": pin.get("icon") is not None,
+                    "zenIsEmpty": False,
+                    "zenIsGlance": False,
+                    "zenLiveFolderItemId": None,
+                    "zenPinnedIcon": pin.get("icon"),
                     "zenStaticLabel": pin.get("label"),
+                    "zenSyncId": sync_id,
+                    "zenWorkspace": space_uuid,
                     "_zenPinnedInitialState": {
                         "entry": {"url": pin["url"], "title": pin.get("label")}
                     },
