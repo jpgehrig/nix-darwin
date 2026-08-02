@@ -2,6 +2,7 @@
   lib,
   username,
   useremail,
+  useremailWork,
   ...
 }: {
   # `programs.git` generates ~/.config/git/config — remove any stale ~/.gitconfig
@@ -13,10 +14,12 @@
     enable = true;
     lfs.enable = true;
 
+    # Work repos commit under the work identity. Generated into the Nix store
+    # rather than read from ~/work/.gitconfig, so it cannot silently go missing.
     includes = [
       {
-        path = "~/work/.gitconfig";
         condition = "gitdir:~/work/";
+        contents.user.email = useremailWork;
       }
     ];
 

@@ -4,7 +4,8 @@
     enableCompletion = true;
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
-    historySubstringSearch.enable = true;
+    # superseded by atuin (Ctrl-R) in core.nix
+    historySubstringSearch.enable = false;
 
     history = {
       size = 50000;
@@ -15,12 +16,21 @@
     };
 
     initContent = ''
-      # Homebrew (Apple Silicon path)
+      # Homebrew (Apple Silicon). `brew shellenv` prepends /opt/homebrew/bin,
+      # which would shadow Nix-provided binaries of the same name. Capture the
+      # Nix-managed PATH first and restore its precedence afterwards, so Nix
+      # stays authoritative and Homebrew only supplies what Nix does not.
       if [ -x /opt/homebrew/bin/brew ]; then
+        __nix_path="$PATH"
         eval "$(/opt/homebrew/bin/brew shellenv)"
+        export PATH="$__nix_path:$PATH"
+        unset __nix_path
       fi
 
       export PATH="$PATH:$HOME/bin:$HOME/.local/bin:$HOME/go/bin"
+
+      # Drop duplicate PATH entries, keeping the first (Nix) occurrence.
+      typeset -U path PATH
 
       # Fix Delete key
       bindkey "^[[3~" delete-char

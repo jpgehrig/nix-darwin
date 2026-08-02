@@ -35,10 +35,12 @@
   }: let
     username = "jpgehrig";
     useremail = "jp.gehrig@gmail.com";
+    # Used for repos under ~/work/ via a conditional git include.
+    useremailWork = "jp.gehrig@56k.cloud";
     system = "aarch64-darwin";
     hostname = "jps-mbp";
 
-    specialArgs = inputs // {inherit username useremail hostname;};
+    specialArgs = inputs // {inherit username useremail useremailWork hostname;};
   in {
     darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
       inherit system specialArgs;

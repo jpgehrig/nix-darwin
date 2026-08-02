@@ -4,7 +4,6 @@
   environment.systemPackages = with pkgs; [
     awscli2
     git
-    python312
   ];
 
   environment.variables.EDITOR = "nvim";
@@ -24,16 +23,15 @@
 
     brews = [
       "arduino-cli"
-      "eza"
-      "gh"
       "googleworkspace-cli"
       "imagemagick"
       "mas"
+      # node/pnpm stay on Homebrew deliberately: nixpkgs 25.11 ships node 24 and
+      # pnpm 10, while Homebrew tracks node 26 / pnpm 11. Revisit on the next
+      # nixpkgs release. Everything else here is either macOS-only or not packaged.
       "node"
-      "pdm"
       "pnpm"
       "tf-summarize"
-      "tfenv"
       "typst"
     ];
 
@@ -46,6 +44,9 @@
       "docker-desktop"
       "drawio"
       "figma"
+      # Nerd Font: required for eza --icons and Starship glyph presets.
+      # Set it as your terminal font after the first rebuild.
+      "font-jetbrains-mono-nerd-font"
       "fujitsu-scansnap-home"
       "github"
       "gcloud-cli"
@@ -71,7 +72,6 @@
 
     masApps = {
       "dropover" = 1355679052;
-      "hidden bar" = 1452453066;
       "nordvpn" = 905953485;
       "whatsapp" = 310633997;
       "windows app" = 1295203466;
