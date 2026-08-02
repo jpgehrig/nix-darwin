@@ -1,6 +1,7 @@
 {username, ...}: {
   imports = [
     ./core.nix
+    ./code-repos.nix
     ./shell.nix
     ./git.nix
     ./starship.nix
