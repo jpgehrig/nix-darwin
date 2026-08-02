@@ -13,13 +13,18 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 │   ├── system.nix         # macOS defaults (dock, finder, trackpad, fonts, TouchID sudo)
 │   ├── apps.nix           # System packages + Homebrew (brews / casks / mas)
 │   └── host-users.nix     # Hostname & user account
-└── home/                  # Home Manager (user-level) modules
-    ├── default.nix        # Entry point, imports the rest
-    ├── core.nix           # CLI tools (ripgrep, fzf, eza, bat, yazi, zoxide, atuin, …)
-    ├── shell.nix          # zsh + direnv + aliases
-    ├── git.nix            # git + delta + SSH auth & commit signing (1Password)
-    ├── starship.nix       # prompt
-    └── vscode.nix         # VSCodium
+├── home/                  # Home Manager (user-level) modules
+│   ├── default.nix        # Entry point, imports the rest
+│   ├── core.nix           # CLI tools (ripgrep, fzf, eza, bat, yazi, zoxide, atuin, …)
+│   ├── shell.nix          # zsh + direnv + aliases
+│   ├── git.nix            # git + delta + SSH auth & commit signing (1Password)
+│   ├── starship.nix       # prompt
+│   ├── vscode.nix         # VSCodium
+│   └── zen.nix            # `zen-restore-spaces` wrapper (Zen is a cask, not nix)
+├── config/
+│   └── zen/spaces.json    # Zen Spaces, containers & pinned tabs (source of truth)
+└── scripts/
+    └── zen-restore-spaces.py  # Replays spaces.json onto a Zen profile
 ```
 
 ## Setting up a new Mac
@@ -142,6 +147,71 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 
 11. **Open a new shell** to pick up zsh, Starship, atuin and direnv.
 
+12. **Restore Zen Spaces.** Launch Zen once so it creates a profile, quit it
+    completely, then run `zen-restore-spaces --dry-run` and, if the diff looks
+    right, `zen-restore-spaces`. See [Zen Browser Spaces](#zen-browser-spaces).
+
+## Zen Browser Spaces
+
+Zen is installed as a **Homebrew cask**, so its profile is not nix-managed. The
+`programs.zen-browser` Home Manager module is deliberately unused — it would
+fight the cask's profile layout.
+
+Instead, `config/zen/spaces.json` holds the Spaces, containers and pinned tabs as
+a hand-editable, diffable file, and `zen-restore-spaces` replays it onto a
+profile. Edit that file directly; it is the source of truth.
+
+### Restoring onto a new Mac
+
+```sh
+# 1. Launch Zen once so it creates a profile, then QUIT IT COMPLETELY
+# 2. Preview — writes nothing
+zen-restore-spaces --dry-run
+# 3. Apply
+zen-restore-spaces
+```
+
+The command refuses to run while Zen is open (`pgrep -x zen`): Zen holds the
+session store in memory and would overwrite it on exit, silently discarding the
+restore.
+
+### What is and isn't managed
+
+Managed: Space names, icons and gradient themes; the five custom containers
+(created if missing); pinned tabs and Essentials per Space.
+
+Not managed, by design:
+
+- **Open tabs and history.** Tab entries, scroll offsets, form data and
+  `*_base64` security principals are session state and stay out of the repo.
+- **Favicons.** Cache, not config — Zen refetches them per site. A pin may show
+  a globe until you visit it once.
+- **Firefox's built-in containers** (`personal` / `work` / `banking` /
+  `shopping`). Nothing binds to them, but Zen recreates them on any fresh
+  profile, so they still appear in the container list.
+- **Bookmarks.** Not captured (the profile had none beyond Mozilla's defaults).
+
+### Editing
+
+Container bindings are by **name**, not by `userContextId` — those integers are
+profile-local, and binding by integer would silently attach a Space to the wrong
+container on a fresh profile. Missing containers are created automatically,
+allocating ids from `lastUserContextId`.
+
+Container `icon` must be one of: `briefcase cart chill circle dollar fence
+fingerprint food fruit gift pet tree vacation`. Colors: `blue turquoise green
+yellow orange red pink purple`.
+
+After editing, **rebuild** — the wrapper reads `spaces.json` from the Nix store.
+To iterate without rebuilding, point it at the working copy:
+
+```sh
+zen-restore-spaces --config ./config/zen/spaces.json --dry-run
+```
+
+Both `containers.json` and `zen-sessions.jsonlz4` are backed up to timestamped
+files before any write, and both are rolled back together if anything fails.
+
 ## Troubleshooting
 
 **`nix: command not found` in new terminals, but sourcing the profile works.**
@@ -226,6 +296,7 @@ darwin-rebuild switch --rollback
 | `nix flake check` | Evaluate the flake without building |
 | `nix fmt` | Format `.nix` files with alejandra |
 | `nix-collect-garbage -d` | Delete old generations now (weekly GC also runs automatically) |
+| `zen-restore-spaces --dry-run` | Preview restoring Zen Spaces from `config/zen/spaces.json` (Zen must be closed) |
 
 ## Notes
 
