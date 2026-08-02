@@ -21,9 +21,7 @@
     procs # `ps` replacement
     hyperfine # command-line benchmarking tool
 
-    # dev tooling (moved off Homebrew)
-    pdm # Python package manager
-    opentofu # open-source Terraform fork; replaces the broken tfenv setup
+    # dev tooling
     python313 # default interpreter; project envs come from direnv/pdm
 
     # nix helpers

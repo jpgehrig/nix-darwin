@@ -2,7 +2,6 @@
   # System-wide packages (reproducible, rollback-able).
   # Prefer Home Manager for user packages; keep this list minimal.
   environment.systemPackages = with pkgs; [
-    awscli2
     git
   ];
 
@@ -21,17 +20,25 @@
 
     taps = [];
 
+    # Homebrew-first for fast-moving standalone binaries: nixpkgs follows the
+    # 25.11 release branch and only lands new upstream versions at the next
+    # release, so tools that ship often sit months behind here.
+    #
+    # The exception is anything with a Home Manager module (fzf, atuin, zoxide,
+    # eza, bat, delta, yazi, neovim, git). Those stay in Nix even when slightly
+    # behind — HM generates their config and shell integration, and trading
+    # declarative config for a minor version bump is a bad deal.
     brews = [
       "arduino-cli"
+      "awscli" # 2.36 vs nixpkgs 2.31
+      "gh" # 2.97 vs nixpkgs 2.83
       "googleworkspace-cli"
       "imagemagick"
       "mas"
-      # gh/node/pnpm stay on Homebrew deliberately: nixpkgs 25.11 lags behind
-      # (gh 2.83 vs 2.96, node 24 vs 26, pnpm 10 vs 11). Revisit on the next
-      # nixpkgs release. Everything else here is either macOS-only or not packaged.
-      "gh"
-      "node"
-      "pnpm"
+      "node" # 26 vs nixpkgs 24
+      "opentofu" # 1.12 vs nixpkgs 1.10; replaces the broken tfenv setup
+      "pdm" # 2.28 vs nixpkgs 2.26
+      "pnpm" # 11 vs nixpkgs 10
       "tf-summarize"
       "typst"
     ];

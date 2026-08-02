@@ -99,6 +99,30 @@ darwin-rebuild switch --rollback
 - Home Manager is wired in as a `darwin` module (`useGlobalPkgs = true`), so packages share the system `nixpkgs` and config.
 - Conflicting files written by Home Manager are backed up with the `.hm-backup` suffix.
 - TouchID for `sudo` is enabled via `security.pam.services.sudo_local.touchIdAuth`.
-- Homebrew uses `cleanup = "zap"`: any brew / cask / mas app **not** declared in `modules/apps.nix` will be uninstalled on the next `rebuild`. Add it to the lists before installing manually.
+- Homebrew uses `cleanup = "none"`: removing a brew / cask from `modules/apps.nix` stops managing it but does **not** uninstall it. Run `brew uninstall <name>` to actually remove it.
 - Git config is managed by Home Manager and written to `~/.config/git/config`. Any pre-existing `~/.gitconfig` is removed on activation (see `home/git.nix`).
-- Anything under `~/work/` automatically picks up `~/work/.gitconfig` via a conditional include — keep work identity / signing keys there.
+- Anything under `~/work/` commits with the work identity (`useremailWork` in `flake.nix`) via a conditional include generated into the Nix store.
+
+## Nix or Homebrew?
+
+Default to **Homebrew for fast-moving standalone binaries**. `nixpkgs` follows the
+`25.11` release branch, so new upstream versions only land at the next release —
+tools that ship often (`gh`, `node`, `pnpm`, `awscli`, `opentofu`, `pdm`) can sit
+months behind. Each is annotated with its version gap in `modules/apps.nix`.
+
+The exception: **anything with a Home Manager module stays in Nix**, even when
+slightly behind. `fzf`, `atuin`, `zoxide`, `eza`, `bat`, `delta`, `yazi`,
+`neovim` and `git` have HM modules that generate their config files *and* wire
+up shell integration. Homebrew would give you the binary and leave you
+hand-writing both. A minor version lag is worth less than declarative config.
+
+Everything else — stable CLI utilities at or near parity (`ripgrep`, `fd`, `jq`,
+`btop`, `dust`, `hyperfine`, …) — stays in Nix, where it is reproducible and
+rolls back with the generation.
+
+Re-check the gaps after `nix flake update` or a nixpkgs release bump:
+
+```bash
+nix eval --raw .#darwinConfigurations.jps-mbp.pkgs.<pkg>.version
+brew info --json=v2 --formula <pkg> | jq -r '.formulae[0].versions.stable'
+```
