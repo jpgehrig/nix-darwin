@@ -36,11 +36,6 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    ```
    Open a new shell so `nix` is on `PATH`.
 
-   > Omitting `--determinate` is what selects upstream Nix over the Determinate
-   > Nix distribution. As of installer v3.21.9 it is a valueless flag, so the
-   > older `--determinate=false` now fails with *"unexpected value 'false'"*.
-   > `NIX_INSTALLER_DETERMINATE=false` works too, if you prefer it explicit.
-
 3. **Install Homebrew** (required for casks / mas / a handful of CLI tools):
    ```sh
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
