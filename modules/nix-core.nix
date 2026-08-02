@@ -1,20 +1,47 @@
-{ pkgs, lib, ... }:
+{...}: {
+  # Nix itself is managed by Determinate (determinate-nixd), not nix-darwin.
+  # Without this, activation aborts with "Determinate detected".
+  #
+  # Flakes need no opt-in here: Determinate enables nix-command and flakes
+  # by default. On an upstream-Nix host, ~/.config/nix/nix.conf covers it.
+  nix.enable = false;
 
-{
-  # enable flakes globally
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  nix.package = pkgs.nix;
+  # `nix.enable = false` also disables `nix.gc` and `nix.optimise`, which used
+  # to install these as launchd jobs. Recreate them directly so the store still
+  # gets collected and deduplicated. Works the same on Determinate and upstream.
+  launchd.daemons = {
+    nix-gc = {
+      command = "/nix/var/nix/profiles/default/bin/nix-collect-garbage --delete-older-than 7d";
+      serviceConfig = {
+        RunAtLoad = false;
+        StartCalendarInterval = [
+          {
+            Weekday = 0;
+            Hour = 3;
+            Minute = 0;
+          }
+        ];
+        StandardOutPath = "/var/log/nix-gc.log";
+        StandardErrorPath = "/var/log/nix-gc.log";
+      };
+    };
 
-  # do garbage collection weekly to keep disk usage low
-  nix.gc = {
-    automatic = lib.mkDefault true;
-    options = lib.mkDefault "--delete-older-than 7d";
+    nix-optimise = {
+      command = "/nix/var/nix/profiles/default/bin/nix-store --optimise";
+      serviceConfig = {
+        RunAtLoad = false;
+        StartCalendarInterval = [
+          {
+            Weekday = 0;
+            Hour = 4;
+            Minute = 0;
+          }
+        ];
+        StandardOutPath = "/var/log/nix-optimise.log";
+        StandardErrorPath = "/var/log/nix-optimise.log";
+      };
+    };
   };
-
-  # Use nix.optimise.automatic instead of nix.settings.auto-optimise-store (changed in 25.05)
-  nix.optimise.automatic = true;
 }

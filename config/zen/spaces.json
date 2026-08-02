@@ -1,0 +1,296 @@
+{
+  "$schema_version": 2,
+  "containers": [
+    {
+      "color": "orange",
+      "icon": "briefcase",
+      "key": "56k.Cloud"
+    },
+    {
+      "color": "purple",
+      "icon": "vacation",
+      "key": "Edeltech"
+    },
+    {
+      "color": "blue",
+      "icon": "circle",
+      "key": "Home"
+    },
+    {
+      "color": "red",
+      "icon": "fence",
+      "key": "Init7"
+    },
+    {
+      "color": "yellow",
+      "icon": "tree",
+      "key": "MagicLabs"
+    }
+  ],
+  "spaces": [
+    {
+      "container": "56k.Cloud",
+      "icon": "💼",
+      "name": "56k.Cloud",
+      "pins": [
+        {
+          "essential": true,
+          "icon": null,
+          "label": "ACP Engineering – Calendar - Week of 24 May 2026",
+          "url": "https://calendar.google.com/calendar/u/0/r"
+        },
+        {
+          "essential": true,
+          "icon": null,
+          "label": "Claude Code",
+          "url": "https://claude.ai/code/routines"
+        },
+        {
+          "essential": true,
+          "icon": null,
+          "label": "Home - Google Drive",
+          "url": "https://drive.google.com/drive/home"
+        },
+        {
+          "essential": true,
+          "icon": null,
+          "label": "Inbox (49) - jp.gehrig@acp.io - ACP Engineering Mail",
+          "url": "https://mail.google.com/mail/u/0/#inbox"
+        },
+        {
+          "essential": true,
+          "icon": null,
+          "label": "Home",
+          "url": "https://odoo.56k.cloud/odoo"
+        },
+        {
+          "essential": true,
+          "icon": null,
+          "label": "Tasks",
+          "url": "https://tasks.google.com/tasks/"
+        },
+        {
+          "essential": false,
+          "icon": null,
+          "label": "nikitabobko/AeroSpace: AeroSpace is an i3-like tiling window manager for macOS",
+          "url": "https://github.com/nikitabobko/AeroSpace"
+        },
+        {
+          "essential": false,
+          "icon": null,
+          "label": "MAP 2.0 Delivery",
+          "url": "https://partnercentral.awspartner.com/partnercentral2/s/resources?Id=a1Gaq000000b329EAA"
+        }
+      ],
+      "theme": {
+        "type": "gradient",
+        "gradientColors": [
+          {
+            "c": [
+              31,
+              52,
+              224
+            ],
+            "isCustom": false,
+            "algorithm": "floating",
+            "isPrimary": true,
+            "lightness": "50",
+            "position": {
+              "x": 152,
+              "y": 142
+            },
+            "type": "explicit-lightness"
+          }
+        ],
+        "opacity": 0.525,
+        "texture": 0.3125
+      },
+      "uuid": "{7ad5afb4-62f1-4aad-92e3-afcbf6c309dd}"
+    },
+    {
+      "container": "Edeltech",
+      "icon": "✈️",
+      "name": "Edeltech",
+      "pins": [
+        {
+          "essential": false,
+          "icon": null,
+          "label": "Inbox (331) - jp.gehrig@edeltech.ch - Edeltech Mail",
+          "url": "https://mail.google.com/mail/u/0/#inbox"
+        }
+      ],
+      "theme": {
+        "type": "gradient",
+        "gradientColors": [
+          {
+            "c": [
+              107,
+              125,
+              173
+            ],
+            "isCustom": false,
+            "algorithm": "analogous",
+            "isPrimary": true,
+            "lightness": "55",
+            "position": {
+              "x": 81,
+              "y": 84
+            },
+            "type": "explicit-lightness"
+          },
+          {
+            "c": [
+              144,
+              107,
+              174
+            ],
+            "isCustom": false,
+            "algorithm": "analogous",
+            "isPrimary": false,
+            "lightness": "55",
+            "position": {
+              "x": 189,
+              "y": 43
+            },
+            "type": "explicit-lightness"
+          },
+          {
+            "c": [
+              107,
+              174,
+              168
+            ],
+            "isCustom": false,
+            "algorithm": "analogous",
+            "isPrimary": false,
+            "lightness": "55",
+            "position": {
+              "x": 43,
+              "y": 193
+            },
+            "type": "explicit-lightness"
+          }
+        ],
+        "opacity": 0.5,
+        "texture": 0
+      },
+      "uuid": "{268b5e9c-13d6-4f02-ba9a-2188ffbcbab9}"
+    },
+    {
+      "container": "Home",
+      "icon": "🏠️",
+      "name": "Home",
+      "pins": [
+        {
+          "essential": true,
+          "icon": null,
+          "label": "Inbox (692) - jp.gehrig@gmail.com - Gmail",
+          "url": "https://mail.google.com/mail/u/0/#inbox"
+        },
+        {
+          "essential": false,
+          "icon": null,
+          "label": "Etsy - Shopping Cart",
+          "url": "https://www.etsy.com/cart?ref=sidebar_cart_view_listing"
+        },
+        {
+          "essential": false,
+          "icon": null,
+          "label": "NTS | Don't Assume",
+          "url": "https://www.nts.live/"
+        }
+      ],
+      "theme": {
+        "type": "gradient",
+        "gradientColors": [
+          {
+            "c": [
+              70,
+              236,
+              168
+            ],
+            "isCustom": false,
+            "algorithm": "floating",
+            "isPrimary": true,
+            "lightness": "60",
+            "position": {
+              "x": 147,
+              "y": 195
+            },
+            "type": "explicit-lightness"
+          }
+        ],
+        "opacity": 0.5,
+        "texture": 0
+      },
+      "uuid": "{96b56e24-9521-4374-9da9-ec2ed3588689}"
+    },
+    {
+      "container": "Init7",
+      "icon": "🔌",
+      "name": "Init7",
+      "pins": [
+        {
+          "essential": false,
+          "icon": null,
+          "label": "PartnerMigration",
+          "url": "https://partnercentral.awspartner.com/partnercentral2/s/partnermigration"
+        }
+      ],
+      "theme": {
+        "type": "gradient",
+        "gradientColors": [
+          {
+            "c": [
+              234,
+              123,
+              137
+            ],
+            "isCustom": false,
+            "algorithm": "floating",
+            "isPrimary": true,
+            "lightness": "70",
+            "position": {
+              "x": 234,
+              "y": 173
+            },
+            "type": "explicit-lightness"
+          }
+        ],
+        "opacity": 0.5,
+        "texture": 0
+      },
+      "uuid": "{0cea9b69-b710-42b0-a055-ea035451ea83}"
+    },
+    {
+      "container": "MagicLabs",
+      "icon": "📒",
+      "name": "MagicLabs",
+      "pins": [],
+      "theme": {
+        "type": "gradient",
+        "gradientColors": [
+          {
+            "c": [
+              217,
+              199,
+              89
+            ],
+            "isCustom": false,
+            "algorithm": "floating",
+            "isPrimary": true,
+            "lightness": "60",
+            "position": {
+              "x": 225,
+              "y": 237
+            },
+            "type": "explicit-lightness"
+          }
+        ],
+        "opacity": 0.5,
+        "texture": 0
+      },
+      "uuid": "{41c51965-ea6b-4127-977b-c0e396735fc6}"
+    }
+  ]
+}

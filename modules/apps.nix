@@ -1,84 +1,83 @@
-{ pkgs, ...}: {
-
-  ##########################################################################
-  #
-  #  Install all apps and packages here.
-  #
-  #  NOTE: Your can find all available options in:
-  #    https://daiderd.com/nix-darwin/manual/index.html
-  #
-  #
-  ##########################################################################
-
-  # Install packages from nix's official package repository.
-  #
-  # The packages installed here are available to all users, and are reproducible across machines, and are rollbackable.
-  # But on macOS, it's less stable than homebrew.
-  #
-  # Related Discussion: https://discourse.nixos.org/t/darwin-again/29331
+{pkgs, ...}: {
+  # System-wide packages (reproducible, rollback-able).
+  # Prefer Home Manager for user packages; keep this list minimal.
   environment.systemPackages = with pkgs; [
-    awscli2
     git
-    python312
   ];
 
   environment.variables.EDITOR = "nvim";
 
-  # To make this work, homebrew need to be installed manually, see https://brew.sh
-  #
-  # The apps installed by homebrew are not managed by nix, and not reproducible!
-  # But on macOS, homebrew has a much larger selection of apps than nixpkgs, especially for GUI apps!
+  # Homebrew must be installed manually first: https://brew.sh
+  # GUI apps, App Store apps, and a few CLI tools not in nixpkgs.
   homebrew = {
     enable = true;
 
     onActivation = {
       autoUpdate = true;
-      cleanup = "zap";
       upgrade = true;
+      cleanup = "none";
     };
 
-    # `brew install`
+    # Homebrew-first for fast-moving standalone binaries: nixpkgs follows the
+    # 25.11 release branch and only lands new upstream versions at the next
+    # release, so tools that ship often sit months behind here.
+    #
+    # The exception is anything with a Home Manager module (fzf, atuin, zoxide,
+    # eza, bat, delta, yazi, neovim, git). Those stay in Nix even when slightly
+    # behind — HM generates their config and shell integration, and trading
+    # declarative config for a minor version bump is a bad deal.
     brews = [
       "arduino-cli"
-      "aws-vault"
+      "awscli" # 2.36 vs nixpkgs 2.31
+      "gh" # 2.97 vs nixpkgs 2.83
+      "googleworkspace-cli"
+      "imagemagick"
       "mas"
-      "pdm"
-      "pnpm"
-      "node"
-      "k6"
-      "tfenv"
+      "node" # 26 vs nixpkgs 24
+      "opentofu" # 1.12 vs nixpkgs 1.10; replaces the broken tfenv setup
+      "pdm" # 2.28 vs nixpkgs 2.26
+      "pnpm" # 11 vs nixpkgs 10
       "tf-summarize"
       "typst"
-      "gh"
+      "uv" # 0.12 vs nixpkgs 0.9; python packaging / `uv run --script`
     ];
 
-    # `brew install --cask`
     casks = [
       "1password"
-      "arc"
+      "1password-cli"
       "balenaetcher"
-      "clockify"
+      "claude"
       "docker-desktop"
       "drawio"
       "figma"
-      "github"
-      "google-drive"
+      # Nerd Font: required for eza --icons and Starship glyph presets.
+      # Set it as your terminal font after the first rebuild.
+      "font-jetbrains-mono-nerd-font"
       "fujitsu-scansnap-home"
-      "microsoft-teams"
+      "github"
+      "gcloud-cli"
+      "google-drive"
+      "onlyoffice"
+      # greedy: also upgrade this self-updating cask on rebuild (`brew upgrade --greedy`).
+      {
+        name = "microsoft-teams";
+        greedy = true;
+      }
       "notion"
+      "plaud"
       "prosys-opc-ua-browser"
       "raycast"
       "slack"
+      "sketchup"
       "vlc"
-      "vscodium"
       "warp"
       "xmind"
+      "zed"
+      "zen"
     ];
 
-    # Apps from AppStore
     masApps = {
       "dropover" = 1355679052;
-      "hidden bar" = 1452453066;
       "nordvpn" = 905953485;
       "whatsapp" = 310633997;
       "windows app" = 1295203466;
