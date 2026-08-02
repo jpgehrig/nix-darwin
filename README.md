@@ -52,7 +52,7 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
    > `https://github.com/` → `git@github.com:`, so this same command would
    > require SSH that isn't set up until step 9.
 
-5. **Adjust identity** in `flake.nix` (`username`, `useremail`, `useremailWork`, `hostname`) if you're not me. `hostname` must match the flake output you activate in step 7 (`.#jps-old-mac`), and it sets the machine's network name via `modules/host-users.nix`.
+5. **Adjust identity** in `flake.nix` (`username`, `useremail`, `useremailWork`, `hostname`) if you're not me. `hostname` must match the flake output you activate in step 7 (`.#jps-macbook`), and it sets the machine's network name via `modules/host-users.nix`.
 
    If you're using a different SSH key, also update `sshPublicKey` in `home/git.nix` — commits are signed with it and activation will configure signing regardless of whether the key exists yet.
 
@@ -65,7 +65,7 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 7. **Bootstrap nix-darwin** — activation must run as root since 25.05. On the very first run, flakes aren't enabled in root's nix config yet, so pass them inline:
    ```sh
    sudo -H nix --extra-experimental-features 'nix-command flakes' \
-     run nix-darwin/nix-darwin-25.11#darwin-rebuild -- switch --flake .#jps-old-mac
+     run nix-darwin/nix-darwin-25.11#darwin-rebuild -- switch --flake .#jps-macbook
    ```
 
    After the first activation, `modules/nix-core.nix` enables `nix-command` and `flakes` daemon-wide, so subsequent rebuilds simplify to:
@@ -193,6 +193,6 @@ rolls back with the generation.
 Re-check the gaps after `nix flake update` or a nixpkgs release bump:
 
 ```bash
-nix eval --raw .#darwinConfigurations.jps-old-mac.pkgs.<pkg>.version
+nix eval --raw .#darwinConfigurations.jps-macbook.pkgs.<pkg>.version
 brew info --json=v2 --formula <pkg> | jq -r '.formulae[0].versions.stable'
 ```

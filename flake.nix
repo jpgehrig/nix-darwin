@@ -38,7 +38,7 @@
     # Used for repos under ~/work/ via a conditional git include.
     useremailWork = "jp.gehrig@56k.cloud";
     system = "aarch64-darwin";
-    hostname = "jps-old-mac";
+    hostname = "jps-macbook";
 
     specialArgs = inputs // {inherit username useremail useremailWork hostname;};
   in {
