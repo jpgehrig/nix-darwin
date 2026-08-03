@@ -19,7 +19,6 @@ Personal macOS configuration managed by [nix-darwin](https://github.com/LnL7/nix
 │   ├── shell.nix          # zsh + direnv + aliases
 │   ├── git.nix            # git + delta + SSH auth & commit signing (1Password)
 │   ├── starship.nix       # prompt
-│   ├── vscode.nix         # VSCodium
 │   └── zen.nix            # zen-backup-spaces / zen-restore-spaces wrappers
 ├── config/
 │   └── zen/spaces.json    # Zen Spaces, containers & pinned tabs (source of truth)

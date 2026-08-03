@@ -33,7 +33,6 @@
           "/Applications/Zen.app"
           "/Applications/Slack.app"
           "/Applications/Notion.app"
-          "/Users/${username}/Applications/Home Manager Apps/VSCodium.app"
           "/System/Applications/System Settings.app"
         ];
         persistent-others = [
