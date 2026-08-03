@@ -139,6 +139,25 @@
         };
         # Prevent Photos from opening automatically when devices are plugged in
         "com.apple.ImageCapture".disableHotPlug = true;
+
+        # Keyboard shortcuts (System Settings > Keyboard > Keyboard Shortcuts).
+        # Each entry's parameters are (ASCII code, key code, modifier mask).
+        # Modifier mask: shift 131072, control 262144, option 524288, command 1048576.
+        "com.apple.symbolichotkeys".AppleSymbolicHotKeys = {
+          # 27 = "Move focus to next window" -> Cmd+< (ISO key between left
+          # shift and Y on the Swiss French QWERTZ layout)
+          "27" = {
+            enabled = true;
+            value = {
+              parameters = [
+                60 # `<`
+                50 # key code for the `<`/`>` key
+                1048576 # command
+              ];
+              type = "standard";
+            };
+          };
+        };
       };
 
       loginwindow = {
