@@ -45,6 +45,7 @@
 
     # productivity
     glow # markdown previewer in terminal
+    python313Packages.markitdown # convert pdf/docx/xlsx/html/etc. to markdown
   ];
 
   programs = {

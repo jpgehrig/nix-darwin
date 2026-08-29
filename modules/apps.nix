@@ -37,6 +37,7 @@
       "opentofu" # 1.12 vs nixpkgs 1.10; replaces the broken tfenv setup
       "pdm" # 2.28 vs nixpkgs 2.26
       "pnpm" # 11 vs nixpkgs 10
+      "rust"
       "tf-summarize"
       "typst"
       "uv" # 0.12 vs nixpkgs 0.9; python packaging / `uv run --script`
